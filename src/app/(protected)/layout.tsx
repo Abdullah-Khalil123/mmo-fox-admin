@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import SideNav from '@/components/partials/SideNav'; // adjust path if needed
+import SideNav from '@/components/layouts/SideNav'; // adjust path if needed
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 

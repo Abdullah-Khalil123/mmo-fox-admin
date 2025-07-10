@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import NextAuth, { CredentialsSignin } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import axios from 'axios';
 
@@ -6,6 +6,14 @@ const axiosInstance = axios.create({
   baseURL: process.env.BACKEND_URL,
   withCredentials: true,
 });
+
+export class InvalidLoginError extends CredentialsSignin {
+  code = 'custom';
+  constructor(message: string) {
+    super(message);
+    this.code = message;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -31,11 +39,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           return null;
-        } catch (error: any) {
-          console.error(
-            'Login error:',
-            error?.response?.data || error.message || error
-          );
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const message =
+              error.response?.data?.error || 'Something went wrong';
+            throw new InvalidLoginError(message);
+          }
           return null;
         }
       },

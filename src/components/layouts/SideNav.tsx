@@ -11,7 +11,7 @@ const links = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/games', label: 'Games', icon: Gamepad2 },
   { href: '/users', label: 'Users', icon: User },
-  { href: '/transactions', label: 'Transactions', icon: DollarSign },
+  { href: '/orders', label: 'Orders', icon: DollarSign },
 ];
 
 export default function SideNav() {

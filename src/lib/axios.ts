@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getSession } from 'next-auth/react';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.BACKEND_URL,
+  baseURL: 'http://localhost:5000/api',
   withCredentials: true,
 });
 
@@ -18,3 +18,5 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(new Error(error));
   }
 );
+
+export { axiosInstance };
