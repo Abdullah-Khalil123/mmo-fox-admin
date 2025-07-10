@@ -4,6 +4,7 @@ import { ReduxStoreProvider } from '@/providers/redux';
 
 import './globals.css';
 import ReactQueryProvider from '@/providers/react-query';
+import { SessionProvider } from 'next-auth/react';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,9 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReduxStoreProvider>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
-        </ReduxStoreProvider>
+        <SessionProvider>
+          <ReduxStoreProvider>
+            <ReactQueryProvider>{children}</ReactQueryProvider>
+          </ReduxStoreProvider>
+        </SessionProvider>
       </body>
     </html>
   );

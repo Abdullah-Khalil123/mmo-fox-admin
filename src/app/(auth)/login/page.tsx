@@ -18,9 +18,8 @@ export default function LoginPage() {
       password,
     });
     if (res?.error) {
-      console.log('Login failed:', res, email, password);
+      console.error('Login failed:', res.error);
     } else {
-      console.log('Login successful:', res, email, password);
       router.push('/dashboard');
     }
   };

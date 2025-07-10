@@ -8,15 +8,14 @@ declare module 'next-auth' {
     email?: string | null;
     token?: string;
   }
-}
-
-interface Session {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-  };
-  accessToken?: string;
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+    };
+    accessToken?: string;
+  }
 }
 
 declare module 'next-auth/jwt' {

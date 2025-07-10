@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Home, User, Gamepad2, DollarSign } from 'lucide-react';
 import { Button } from '../ui/button';
+import { signOut } from 'next-auth/react';
 
 const links = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/Games', label: 'Games', icon: Gamepad2 },
-  { href: '/Users', label: 'Users', icon: User },
-  { href: '/Transactions', label: 'Transactions', icon: DollarSign },
+  { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/games', label: 'Games', icon: Gamepad2 },
+  { href: '/users', label: 'Users', icon: User },
+  { href: '/transactions', label: 'Transactions', icon: DollarSign },
 ];
 
 export default function SideNav() {
@@ -33,7 +34,9 @@ export default function SideNav() {
           </Link>
         ))}
       </nav>
-      <Button variant={'destructive'}>Sign Out</Button>
+      <Button variant={'destructive'} onClick={() => signOut()}>
+        Sign Out
+      </Button>
     </aside>
   );
 }

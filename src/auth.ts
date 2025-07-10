@@ -1,5 +1,11 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import axios from 'axios';
+
+const axiosInstance = axios.create({
+  baseURL: process.env.BACKEND_URL,
+  withCredentials: true,
+});
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -10,24 +16,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const { email, password } = credentials || {};
-          if (email && password) {
-            if (email == 'abdullah@gmail.com' && password == '12345678') {
-              const id = Math.random().toString(36).substring(2, 15);
-              return {
-                id: id,
-                name: 'Abdullah',
-                email: email as string,
-                token: '1234567890abcdef',
-                password: password as string,
-              };
-            }
-            return null;
+          const response = await axiosInstance.post('/user/login', {
+            email: credentials?.email,
+            password: credentials?.password,
+          });
+          const { user, token } = response.data;
+          if (user && token) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              token: token,
+            };
           }
+
           return null;
         } catch (error: any) {
-          const message = error.response?.data?.error || 'Something went wrong';
-          throw new Error(message);
+          console.error(
+            'Login error:',
+            error?.response?.data || error.message || error
+          );
+          return null;
         }
       },
     }),
@@ -38,18 +47,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user, account }) {
       if (user && account?.type === 'credentials') {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.accessToken = user.token;
+        const { id, name, email, token: accessToken } = user;
+        Object.assign(token, { id, name, email, accessToken });
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id ?? '';
-        session.user.name = token.name ?? '';
-        session.user.email = token.email ?? '';
+        const { id = '', name = '', email = '' } = token ?? {};
+        Object.assign(session.user, { id, name, email });
 
         return {
           ...session,
