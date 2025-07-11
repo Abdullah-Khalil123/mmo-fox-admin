@@ -1,7 +1,7 @@
 'use client';
 import SearchHeader from './searchHeader';
 import { useGames } from '@/hooks/useGames';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Pagination from './pagination';
 import GameTable from './table';
 
@@ -10,13 +10,10 @@ const GameHomePage = () => {
   const [limit, setLimit] = useState(10); // Default limit set to 10
 
   const { data, isError, isLoading } = useGames(page, limit);
+
   const games = data?.data || [];
   const pagination = data?.pagination || {};
 
-  useEffect(() => {
-    console.log('Games Data:', games);
-    console.log('Pagination Data:', pagination);
-  });
   if (isLoading) {
     return <div>Loading...</div>;
   }

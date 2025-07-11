@@ -1,10 +1,10 @@
+import NewService from '@/components/partials/Services/New';
 import React from 'react';
-import Services from '@/components/partials/Services';
 
 const ServicesPage = ({ params }: { params: { id: string | number } }) => {
   return (
     <div>
-      <Services gameId={params.id} />
+      <NewService gameId={params.id} />
     </div>
   );
 };

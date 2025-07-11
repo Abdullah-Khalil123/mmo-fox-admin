@@ -13,3 +13,42 @@ export const games = [
   { id: 7, name: 'Fall Guys', genre: 'Party', status: 'Inactive' },
   { id: 8, name: 'Valorant', genre: 'FPS', status: 'Active' },
 ];
+
+export const services = [
+  {
+    id: 1,
+    name: 'WoW Gold',
+    slug: 'wow-gold',
+    imageUrl: 'https://example.com/wow-gold.jpg',
+    gameId: 1,
+    createdAt: '2024-07-11T00:00:00.000Z',
+    updatedAt: '2024-07-11T00:00:00.000Z',
+  },
+  {
+    id: 2,
+    name: 'WoW Gold',
+    slug: 'wow-gold',
+    imageUrl: 'https://example.com/wow-gold.jpg',
+    gameId: 1,
+    createdAt: '2024-07-11T00:00:00.000Z',
+    updatedAt: '2024-07-11T00:00:00.000Z',
+  },
+  {
+    id: 3,
+    name: 'WoW Gold',
+    slug: 'wow-gold',
+    imageUrl: 'https://example.com/wow-gold.jpg',
+    gameId: 1,
+    createdAt: '2024-07-11T00:00:00.000Z',
+    updatedAt: '2024-07-11T00:00:00.000Z',
+  },
+  {
+    id: 4,
+    name: 'WoW Gold',
+    slug: 'wow-gold',
+    imageUrl: 'https://example.com/wow-gold.jpg',
+    gameId: 1,
+    createdAt: '2024-07-11T00:00:00.000Z',
+    updatedAt: '2024-07-11T00:00:00.000Z',
+  },
+];

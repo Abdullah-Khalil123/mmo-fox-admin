@@ -1,7 +1,12 @@
+import EditGame from '@/components/partials/Games/Edit';
 import React from 'react';
 
 const EditGamePage = () => {
-  return <div>EditGamePage</div>;
+  return (
+    <div>
+      <EditGame />
+    </div>
+  );
 };
 
 export default EditGamePage;

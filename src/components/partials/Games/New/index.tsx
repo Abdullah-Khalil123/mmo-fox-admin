@@ -3,13 +3,36 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useCreateGame } from '@/hooks/useGames';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
+import { GameFormData, gameSchema } from '@/types/game.schema';
+import ErrorInput from '@/components/error';
 
 const AddNewGames = () => {
   const router = useRouter();
+  const { mutate, isPending } = useCreateGame();
+
+  const {
+    register,
+    handleSubmit,
+
+    formState: { errors },
+  } = useForm<GameFormData>({
+    resolver: zodResolver(gameSchema),
+  });
+
+  const onSubmit = (data: GameFormData) => {
+    mutate(data, {
+      onSuccess: () => {
+        router.push('/games');
+      },
+    });
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white rounded-2xl shadow">
       <ChevronLeft
@@ -20,34 +43,37 @@ const AddNewGames = () => {
       />
       <h2 className="text-2xl font-semibold tracking-tight">Add New Game</h2>
 
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Game Name</Label>
-          <Input id="name" placeholder="Enter game name" />
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="name">Game Name</Label>
+            <Input {...register('name')} placeholder="Enter game name" />
+            {errors.name && <ErrorInput>{errors.name.message}</ErrorInput>}
+          </div>
 
-        <div>
-          <Label htmlFor="seoTitle">SEO Title</Label>
-          <Input id="seoTitle" placeholder="Enter SEO title" />
-        </div>
+          <div>
+            <Label htmlFor="slug">Slug</Label>
+            <Input {...register('slug')} placeholder="Enter slug" />
+            {errors.slug && <ErrorInput>{errors.slug.message}</ErrorInput>}
+          </div>
 
-        <div>
-          <Label htmlFor="seoDesc">SEO Description</Label>
-          <Textarea id="seoDesc" placeholder="Enter SEO description" />
-        </div>
+          <div>
+            <Label htmlFor="imageUrl">Image URL</Label>
+            <Input
+              {...register('imageUrl')}
+              type="text"
+              placeholder="Enter image URL"
+            />
+            {errors.imageUrl && (
+              <ErrorInput>{errors.imageUrl.message}</ErrorInput>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="slug">Slug</Label>
-          <Input id="slug" placeholder="Enter slug" />
+          <Button className="w-full" type="submit" disabled={isPending}>
+            Submit
+          </Button>
         </div>
-
-        <div>
-          <Label htmlFor="imageUrl">Image URL</Label>
-          <Input id="imageUrl" type="file" className="cursor-pointer" />
-        </div>
-
-        <Button className="w-full">Submit</Button>
-      </div>
+      </form>
     </div>
   );
 };
