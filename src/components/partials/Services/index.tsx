@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import ServicesTable from './table';
 import Search from './searchHeader';
 import { useServicesByGameId } from '@/hooks/useServices';

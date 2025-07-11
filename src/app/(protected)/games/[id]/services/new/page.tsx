@@ -1,10 +1,11 @@
 import NewService from '@/components/partials/Services/New';
-import React from 'react';
+import React, { use } from 'react';
 
-const ServicesPage = ({ params }: { params: { id: string | number } }) => {
+const ServicesPage = ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = use(params);
   return (
     <div>
-      <NewService gameId={params.id} />
+      <NewService gameId={id} />
     </div>
   );
 };

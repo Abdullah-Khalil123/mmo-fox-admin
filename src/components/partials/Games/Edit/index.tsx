@@ -77,7 +77,7 @@ const EditGame = () => {
           />
         </div>
 
-        {gameData.imageUrl && (
+        {/* {gameData.imageUrl && (
           <div>
             <Label>Current Image Preview</Label>
             <div className="mt-2 p-4 border rounded-lg bg-gray-50">
@@ -91,7 +91,7 @@ const EditGame = () => {
               />
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="grid grid-cols-2 gap-4 pt-4">
           <div>

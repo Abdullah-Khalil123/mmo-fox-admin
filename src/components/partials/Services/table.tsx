@@ -12,7 +12,7 @@ import {
 import { Service } from '@/types/game';
 import React from 'react';
 
-const ServicesTable = ({ services }: { services?: any[] }) => {
+const ServicesTable = ({ services }: { services?: Service[] }) => {
   if (!services || services.length === 0) {
     return (
       <div className="text-center text-muted-foreground">

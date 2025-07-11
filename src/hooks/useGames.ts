@@ -1,6 +1,5 @@
 import { getGames, getGameByID, createGame } from '@/actions/Games/actions';
 import queryClient from '@/lib/queryClient';
-import { Game } from '@/types/game';
 import { GameFormData } from '@/types/game.schema';
 import { useMutation, useQuery } from '@tanstack/react-query';
 

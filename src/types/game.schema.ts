@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { de } from 'zod/v4/locales';
 
 export const gameSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),

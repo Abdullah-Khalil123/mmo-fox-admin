@@ -19,7 +19,6 @@ const AddNewGames = () => {
   const {
     register,
     handleSubmit,
-
     formState: { errors },
   } = useForm<GameFormData>({
     resolver: zodResolver(gameSchema),

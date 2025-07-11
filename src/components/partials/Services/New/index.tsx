@@ -14,11 +14,7 @@ import { useCreateServiceByGameId } from '@/hooks/useServices';
 const NewService = ({ gameId }: { gameId: string | number }) => {
   const router = useRouter();
   const { mutate, isPending } = useCreateServiceByGameId(gameId);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ServiceFormData>({
+  const { register, handleSubmit } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
   });
 

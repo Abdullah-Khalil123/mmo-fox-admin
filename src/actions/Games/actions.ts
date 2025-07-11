@@ -1,5 +1,4 @@
 import { axiosInstance } from '@/lib/axios';
-import { Game } from '@/types/game';
 import { GameFormData } from '@/types/game.schema';
 import axios from 'axios';
 
