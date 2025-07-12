@@ -1,10 +1,11 @@
 import EditGame from '@/components/partials/Games/Edit';
-import React from 'react';
+import React, { use } from 'react';
 
-const EditGamePage = () => {
+const EditGamePage = ({ params }: { params: Promise<{ id: number }> }) => {
+  const { id } = use(params);
   return (
     <div>
-      <EditGame />
+      <EditGame gameId={id} />
     </div>
   );
 };

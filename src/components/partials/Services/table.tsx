@@ -9,10 +9,26 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { useDeleteServiceById } from '@/hooks/useServices';
 import { Service } from '@/types/game';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
-const ServicesTable = ({ services }: { services?: Service[] }) => {
+const ServicesTable = ({
+  services,
+  gameId,
+}: {
+  services?: Service[];
+  gameId: string | number;
+}) => {
+  const router = useRouter();
+  const { mutate, isPending } = useDeleteServiceById(gameId);
+
+  const handleDelete = (serviceId: string | number) => {
+    if (isPending) return;
+    mutate(serviceId);
+  };
+
   if (!services || services.length === 0) {
     return (
       <div className="text-center text-muted-foreground">
@@ -58,9 +74,31 @@ const ServicesTable = ({ services }: { services?: Service[] }) => {
               </TableCell>
               <TableCell>
                 <div className="flex justify-end gap-2">
-                  <Button variant={'outline'}>View Details</Button>
-                  <Button variant={'secondary'}>Edit</Button>
-                  <Button variant={'destructive'}>Delete</Button>
+                  <Button
+                    variant={'outline'}
+                    onClick={() => {
+                      router.push(`services/view/${service.id}`);
+                    }}
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    variant={'secondary'}
+                    onClick={() => {
+                      router.push(`services/edit/${service.id}`);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    disabled={isPending}
+                    variant={'destructive'}
+                    onClick={() => {
+                      handleDelete(service.id);
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>

@@ -59,6 +59,15 @@ const GameTable = ({ games }: { games: Game[] }) => {
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => {
+                      router.push(`/games/${game.id}`);
+                    }}
+                  >
+                    View
+                  </Button>
+                  <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {

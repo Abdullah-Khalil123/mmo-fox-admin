@@ -7,8 +7,8 @@ export interface Game {
   name: string;
   slug: string;
   imageUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
   categories?: Category[];
   services?: Service[];
 }
@@ -40,9 +40,18 @@ export interface Service {
   published: boolean;
   game?: Game;
   category?: Category;
+  type: ServiceType;
   vendor?: User;
   orders?: Order[];
   reviews?: Review[];
+}
+
+export enum ServiceType {
+  CURRENCY = 'CURRENCY',
+  LEVELING = 'LEVELING',
+  BOOSTING = 'BOOSTING',
+  COACHING = 'COACHING',
+  OTHER = 'OTHER',
 }
 
 export enum ServiceStatus {

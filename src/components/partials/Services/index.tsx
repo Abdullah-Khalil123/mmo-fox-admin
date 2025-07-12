@@ -16,7 +16,7 @@ const Services = ({ gameId }: { gameId: number | string }) => {
   return (
     <div>
       <Search />
-      <ServicesTable services={services} />
+      <ServicesTable services={services} gameId={gameId} />
     </div>
   );
 };

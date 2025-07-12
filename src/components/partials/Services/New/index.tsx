@@ -19,7 +19,6 @@ const NewService = ({ gameId }: { gameId: string | number }) => {
   });
 
   const onSubmit = (FormData: ServiceFormData) => {
-    console.log('Form Data:', FormData);
     mutate(FormData, {
       onSuccess: () => {
         router.push(`/games/${gameId}/services`);
@@ -29,12 +28,6 @@ const NewService = ({ gameId }: { gameId: string | number }) => {
 
   return (
     <div className="max-w-lg mx-auto space-y-6 bg-white p-6 rounded-2xl shadow">
-      <ChevronLeft
-        className="bg-gray-200 p-1 size-8 rounded-full hover:bg-gray-300 cursor-pointer "
-        onClick={() => {
-          router.back();
-        }}
-      />
       <h2 className="text-2xl font-semibold tracking-tight">
         Create New Service
       </h2>
@@ -62,10 +55,20 @@ const NewService = ({ gameId }: { gameId: string | number }) => {
           <label className="block text-sm font-medium mb-1">Currency</label>
           <Input {...register('currency')} placeholder="USD, PKR, EUR, etc." />
         </div>
-
-        <Button type="submit" className="w-full" disabled={isPending}>
-          Create Service
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" className="flex-1" disabled={isPending}>
+            Create Service
+          </Button>
+          <Button
+            className="flex-1"
+            variant={'secondary'}
+            onClick={() => {
+              router.back();
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
       </form>
     </div>
   );

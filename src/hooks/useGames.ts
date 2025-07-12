@@ -1,4 +1,9 @@
-import { getGames, getGameByID, createGame } from '@/actions/Games/actions';
+import {
+  getGames,
+  getGameByID,
+  createGame,
+  updateGame,
+} from '@/actions/Games/actions';
 import queryClient from '@/lib/queryClient';
 import { GameFormData } from '@/types/game.schema';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -10,11 +15,11 @@ export const useGames = (page: number = 1, limit: number = 1) => {
   });
 };
 
-export const useGameByID = (id: string | number) => {
+export const useGameByID = (gameId: string | number) => {
   return useQuery({
-    queryKey: ['game', id],
-    queryFn: () => getGameByID(id),
-    enabled: !!id, // Only fetch if id is provided
+    queryKey: ['game', gameId],
+    queryFn: () => getGameByID(gameId),
+    enabled: !!gameId, // Only fetch if id is provided
   });
 };
 
@@ -23,6 +28,17 @@ export const useCreateGame = () => {
     mutationFn: (gameData: GameFormData) => createGame(gameData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] });
+    },
+  });
+};
+
+export const useUpdateGame = (gameId: string | number) => {
+  return useMutation({
+    mutationFn: (gameData: GameFormData) => updateGame(gameId, gameData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['game', gameId],
+      });
     },
   });
 };

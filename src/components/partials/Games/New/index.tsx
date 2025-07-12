@@ -68,9 +68,18 @@ const AddNewGames = () => {
             )}
           </div>
 
-          <Button className="w-full" type="submit" disabled={isPending}>
-            Submit
-          </Button>
+          <div className="flex gap-3 pt-4">
+            <Button className="flex-1" type="submit">
+              Create Game
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() => router.push('/games')}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </form>
     </div>

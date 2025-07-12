@@ -42,3 +42,18 @@ export const createGame = async (gameData: GameFormData) => {
     }
   }
 };
+
+export const updateGame = async (
+  id: string | number,
+  gameData: GameFormData
+) => {
+  try {
+    const response = await axiosInstance.put(`/game/${id}`, gameData);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return new Error(
+        error.response?.data?.message || 'Failed to update game'
+      );
+    }
+  }
+};
