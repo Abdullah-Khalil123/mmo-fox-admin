@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useServiceById } from '@/hooks/useServices';
 
-export default function ViewService() {
-  const { data, isLoading, isError } = useServiceById(1);
+export default function ViewService({ serviceId }: { serviceId: number }) {
+  const { data, isLoading, isError } = useServiceById(serviceId);
   const service = data?.data;
-  
+
   const router = useRouter();
 
   if (isLoading) {

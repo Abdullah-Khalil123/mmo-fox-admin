@@ -25,7 +25,7 @@ export const useGameByID = (gameId: string | number) => {
 
 export const useCreateGame = () => {
   return useMutation({
-    mutationFn: (gameData: GameFormData) => createGame(gameData),
+    mutationFn: (gameData: FormData) => createGame(gameData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] });
     },

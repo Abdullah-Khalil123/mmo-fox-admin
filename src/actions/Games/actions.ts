@@ -32,9 +32,13 @@ export const getGameByID = async (id: string | number) => {
   }
 };
 
-export const createGame = async (gameData: GameFormData) => {
+export const createGame = async (gameData: FormData) => {
   try {
-    const response = await axiosInstance.post('/game', gameData);
+    const response = await axiosInstance.post('/game', gameData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

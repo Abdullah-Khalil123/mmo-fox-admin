@@ -8,24 +8,47 @@ import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import ErrorInput from '@/components/error';
 
 const AddNewGames = () => {
   const router = useRouter();
   const { mutate, isPending } = useCreateGame();
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<GameFormData>({
     resolver: zodResolver(gameSchema),
   });
+  const imageUrl = watch('imageUrl');
+  useEffect(() => {
+    if (imageUrl && imageUrl.length > 0) {
+      const file = imageUrl[0] as File;
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+
+      // Clean up when component unmounts or new image is chosen
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [imageUrl]);
 
   const onSubmit = (data: GameFormData) => {
-    mutate(data, {
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (key !== 'imageUrl') {
+        formData.append(key, value as string);
+      } else if (value instanceof FileList && value.length > 0) {
+        formData.append('game-image', value[0]);
+      }
+    });
+
+    mutate(formData, {
       onSuccess: () => {
         router.push('/games');
       },
@@ -57,19 +80,24 @@ const AddNewGames = () => {
           </div>
 
           <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
+            <Label htmlFor="image">Image</Label>
             <Input
+              type="file"
+              accept="image/*"
+              placeholder="Upload Image"
               {...register('imageUrl')}
-              type="text"
-              placeholder="Enter image URL"
             />
-            {errors.imageUrl && (
-              <ErrorInput>{errors.imageUrl.message}</ErrorInput>
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="mt-2 rounded-md w-full object-cover border"
+              />
             )}
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button className="flex-1" type="submit">
+            <Button className="flex-1" type="submit" disabled={isPending}>
               Create Game
             </Button>
             <Button

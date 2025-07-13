@@ -25,7 +25,7 @@ export const useServicesByGameId = (gameId: string | number) => {
 
 export const useCreateServiceByGameId = (gameId: string | number) => {
   return useMutation({
-    mutationFn: (serviceData: ServiceFormData) =>
+    mutationFn: (serviceData: FormData) =>
       createServiceByGameId(gameId, serviceData),
     onSuccess: () => {
       queryClient.invalidateQueries({

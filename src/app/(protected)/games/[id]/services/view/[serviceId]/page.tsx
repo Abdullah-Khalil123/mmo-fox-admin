@@ -1,11 +1,15 @@
 import ViewService from '@/components/partials/Services/View';
-import { useServiceById } from '@/hooks/useServices';
-import React from 'react';
+import React, { use } from 'react';
 
-const ViewServicePage = () => {
+const ViewServicePage = ({
+  params,
+}: {
+  params: Promise<{ serviceId: number }>;
+}) => {
+  const { serviceId } = use(params);
   return (
     <div>
-      <ViewService />
+      <ViewService serviceId={serviceId} />
     </div>
   );
 };

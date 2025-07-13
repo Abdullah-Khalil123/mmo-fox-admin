@@ -5,7 +5,7 @@ import { sl } from 'zod/v4/locales';
 export const gameSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   slug: z.string().min(3, 'Slug is required'),
-  imageUrl: z.url('Must be a valid URL').optional(),
+  imageUrl: z.instanceof(FileList).optional().or(z.string()),
 });
 
 export type GameFormData = z.infer<typeof gameSchema>;
@@ -13,7 +13,7 @@ export type GameFormData = z.infer<typeof gameSchema>;
 export const serviceSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   description: z.string().optional(),
-  imageUrl: z.string().url('Must be a valid URL').optional(),
+  imageUrl: z.instanceof(FileList).optional().or(z.string()),
   basePrice: z
     .number()
     .min(0, 'Base price must be a positive number')

@@ -30,12 +30,17 @@ const getServicesByGameId = async (gameId: number | string) => {
 
 const createServiceByGameId = async (
   gameId: string | number,
-  serviceData: ServiceFormData
+  serviceData: FormData
 ) => {
   try {
     const response = await axiosInstance.post(
       `/service/${gameId}`,
-      serviceData
+      serviceData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -62,12 +67,17 @@ const deleteServiceById = async (serviceId: string | number) => {
 
 const updateServiceById = async (
   serviceId: string | number,
-  serviceData: ServiceFormData
+  serviceData: FormData
 ) => {
   try {
     const response = await axiosInstance.put(
       `/service/${serviceId}`,
-      serviceData
+      serviceData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
     return response.data;
   } catch (error) {
