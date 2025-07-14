@@ -1,10 +1,11 @@
 import GameView from '@/components/partials/Games/View';
-import React from 'react';
+import React, { use } from 'react';
 
-const GameViewPage = () => {
+const GameViewPage = ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = use(params);
   return (
     <div>
-      <GameView />
+      <GameView id={id} />
     </div>
   );
 };

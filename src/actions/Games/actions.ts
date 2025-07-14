@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/lib/axios';
-import { GameFormData } from '@/types/game.schema';
+import { CategoryFormData, GameFormData } from '@/types/game.schema';
 import axios from 'axios';
 
 export const getGames = async (page: number = 1, limit: number = 10) => {
@@ -57,6 +57,38 @@ export const updateGame = async (
     if (axios.isAxiosError(error)) {
       return new Error(
         error.response?.data?.message || 'Failed to update game'
+      );
+    }
+  }
+};
+
+export const createGameCategory = async (
+  id: number | string,
+  categoryData: CategoryFormData
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/game/${id}/category`,
+      categoryData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to add game category'
+      );
+    }
+  }
+};
+
+export const deleteGameCategory = async (id: string | number) => {
+  try {
+    const response = await axiosInstance.delete(`/game/${id}/category`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to delete game category'
       );
     }
   }

@@ -3,7 +3,11 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useGameByID, useUpdateGame } from '@/hooks/useGames';
+import {
+  useDeleteGameCategory,
+  useGameByID,
+  useUpdateGame,
+} from '@/hooks/useGames';
 import { Game } from '@/types/game';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +21,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const router = useRouter();
   const { data, isLoading, isError } = useGameByID(gameId);
   const { mutate, isPending } = useUpdateGame(gameId);
+  const { mutate: mutateCategory } = useDeleteGameCategory(gameId);
 
   const [openDialog, setOpenDialog] = useState(false);
   const gameData: Game = data?.data;
@@ -107,10 +112,15 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                     </div>
                     <button
                       type="button"
-                      className="text-red-500 hover:text-red-700 font-bold text-xl"
+                      className="cursor-pointer text-red-500 hover:text-red-700 font-bold text-xl"
                       onClick={() => {
-                        // Delete category logic placeholder
-                        console.log(`Delete category ${cat.id}`);
+                        mutateCategory(cat.id, {
+                          onSuccess: () => {
+                            console.log(
+                              `Category ${cat.name} deleted successfully`
+                            );
+                          },
+                        });
                       }}
                     >
                       ×
@@ -190,7 +200,11 @@ const EditGame = ({ gameId }: { gameId: number }) => {
           </div>
         </div>
       </form>
-      <CategoryDialog openDialog={openDialog} setOpenDialog={setOpenDialog} />
+      <CategoryDialog
+        gameId={gameId}
+        openDialog={openDialog}
+        setOpenDialog={setOpenDialog}
+      />
     </div>
   );
 };

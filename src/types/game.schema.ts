@@ -1,11 +1,21 @@
 import { z } from 'zod';
 import { ServiceType } from './game';
-import { sl } from 'zod/v4/locales';
+
+export const categorySchema = z.object({
+  id: z.number().int('ID must be a number').optional(),
+  name: z.string().min(3, 'Name must be at least 3 characters'),
+  slug: z.string().min(3, 'Slug is required'),
+  gameId: z.number().int('Game ID must be a number').optional(),
+  parentId: z.number().int().optional(),
+});
+
+export type CategoryFormData = z.infer<typeof categorySchema>;
 
 export const gameSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   slug: z.string().min(3, 'Slug is required'),
-  imageUrl: z.instanceof(FileList).optional().or(z.string()),
+  imageUrl: z.any().optional(),
+  category: z.array(categorySchema).optional(),
 });
 
 export type GameFormData = z.infer<typeof gameSchema>;
@@ -13,7 +23,7 @@ export type GameFormData = z.infer<typeof gameSchema>;
 export const serviceSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   description: z.string().optional(),
-  imageUrl: z.instanceof(FileList).optional().or(z.string()),
+  imageUrl: z.any().optional(),
   basePrice: z
     .number()
     .min(0, 'Base price must be a positive number')
@@ -29,12 +39,3 @@ export const serviceSchema = z.object({
     .optional(),
 });
 export type ServiceFormData = z.infer<typeof serviceSchema>;
-
-export const categorySchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  slug: z.string().min(3, 'Slug is required'),
-  gameId: z.number().int('Game ID must be a number'),
-  parentId: z.number().int().optional(),
-});
-
-export type CategoryFormData = z.infer<typeof categorySchema>;

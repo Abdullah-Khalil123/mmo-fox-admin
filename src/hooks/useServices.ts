@@ -48,7 +48,7 @@ export const useDeleteServiceById = (gameId: string | number) => {
 
 export const useUpdateServiceById = (serviceId: string | number) => {
   return useMutation({
-    mutationFn: (serviceData: ServiceFormData) =>
+    mutationFn: (serviceData: FormData) =>
       updateServiceById(serviceId, serviceData),
     onSuccess: () => {
       queryClient.invalidateQueries({

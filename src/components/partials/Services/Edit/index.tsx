@@ -26,7 +26,7 @@ const ServiceEdit = ({ serviceId }: { serviceId: string | number }) => {
     resolver: zodResolver(serviceSchema),
   });
   const [imagePreview, setImagePreview] = useState<string | undefined>(
-    serviceData.imageUrl
+    serviceData?.imageUrl ? serviceData.imageUrl : undefined
   );
 
   const onSubmit = (data: ServiceFormData) => {
