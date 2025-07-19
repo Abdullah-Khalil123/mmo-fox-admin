@@ -7,6 +7,7 @@ import { useServiceById, useUpdateServiceById } from '@/hooks/useServices';
 import { Service } from '@/types/game';
 import { ServiceFormData, serviceSchema } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -20,8 +21,8 @@ const ServiceEdit = ({ serviceId }: { serviceId: string | number }) => {
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors },
+    // watch,
+    // formState: { errors },
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
   });
@@ -109,10 +110,12 @@ const ServiceEdit = ({ serviceId }: { serviceId: string | number }) => {
           />
 
           {imagePreview ? (
-            <img
+            <Image
               src={imagePreview}
               alt="Service Preview"
               className="w-full h-48 object-cover rounded-lg mb-2"
+              width={300}
+              height={200}
             />
           ) : (
             <div className="h-48 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">

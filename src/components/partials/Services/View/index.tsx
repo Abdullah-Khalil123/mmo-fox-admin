@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useServiceById } from '@/hooks/useServices';
+import Image from 'next/image';
 
 export default function ViewService({ serviceId }: { serviceId: number }) {
   const { data, isLoading, isError } = useServiceById(serviceId);
@@ -25,7 +26,9 @@ export default function ViewService({ serviceId }: { serviceId: number }) {
 
       <CardContent className="space-y-4">
         {service.imageUrl ? (
-          <img
+          <Image
+            width={300}
+            height={200}
             src={service.imageUrl}
             alt={service.name}
             className="w-full h-48 object-cover rounded-md"

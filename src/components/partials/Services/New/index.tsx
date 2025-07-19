@@ -10,6 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { serviceSchema, ServiceFormData } from '@/types/game.schema';
 import { useCreateServiceByGameId } from '@/hooks/useServices';
 import { Label } from '@/components/ui/label';
+import Image from 'next/image';
 
 const NewService = ({ gameId }: { gameId: string | number }) => {
   const router = useRouter();
@@ -79,10 +80,12 @@ const NewService = ({ gameId }: { gameId: string | number }) => {
           <Label>Image</Label>
           <Input type="file" accept="image/*" {...register('imageUrl')} />
           {imagePreview && (
-            <img
+            <Image
               src={imagePreview}
               alt="Preview"
               className="mt-2 rounded-md w-full object-cover border"
+              width={300}
+              height={200}
             />
           )}
         </div>
