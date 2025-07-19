@@ -3,6 +3,7 @@ import { Review } from './review';
 import { User } from './user';
 
 export interface Game {
+  translations: boolean;
   id?: number;
   name: string;
   slug: string;

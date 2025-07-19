@@ -11,7 +11,11 @@ const layout = async ({ children }: { children: ReactNode }) => {
   return (
     <div className="flex min-h-screen">
       <SideNav />
-      <main className="p-6 w-full max-h-dvh overflow-y-scroll">{children}</main>
+      <main className="flex-1 md:ml-64 pt-16 md:pt-0 transition-all duration-300">
+        <div className="p-4 md:p-6 max-h-dvh overflow-y-auto">
+          {children}
+        </div>
+      </main>
     </div>
   );
 };
