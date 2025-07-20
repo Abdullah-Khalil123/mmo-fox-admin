@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useGameAllDataByID } from '@/hooks/useGames';
 import { Game } from '@/types/game';
-import { ChevronLeft, Globe, Info } from 'lucide-react';
+import { ChevronLeft, Globe, Info, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -16,7 +16,6 @@ const GameView = ({ gameId }: { gameId: string }) => {
   const { data, isLoading, isError } = useGameAllDataByID(gameId);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const gameData: Game = data?.data;
-  console.log(data)
 
   useEffect(() => {
     if (gameData?.imageUrl) {
@@ -116,6 +115,46 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   <div className="mt-4">
                     <Skeleton className="h-4 w-24 mb-2" />
                     <Skeleton className="h-16 w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* SEO Section Skeleton */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="w-2 h-6 rounded-full" />
+                <Skeleton className="h-6 w-32" />
+              </div>
+            </div>
+            <div className="space-y-6">
+              {[...Array(1)].map((_, index) => (
+                <div key={index} className="border border-gray-200 rounded-xl p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <Skeleton className="h-6 w-32" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      <Skeleton className="h-8 w-full" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      <Skeleton className="h-8 w-full" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                  <div className="mt-4">
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <div className="flex flex-wrap gap-2">
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -306,7 +345,10 @@ const GameView = ({ gameId }: { gameId: string }) => {
                     <div className="mt-4">
                       <Label className="text-gray-700 mb-1 block">Description</Label>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <p className="whitespace-pre-line">{translation.description}</p>
+                        <div
+                          className="prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: translation.description || '' }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -314,6 +356,84 @@ const GameView = ({ gameId }: { gameId: string }) => {
               ) : (
                 <div className="bg-gray-50 rounded-lg p-6 text-center">
                   <p className="text-gray-500">No translations available for this game</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* SEO Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
+                <h2 className="text-xl font-semibold text-gray-800">SEO Information</h2>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-500 mt-1 mb-4">Search engine optimization details</p>
+
+            <div className="space-y-6">
+              {Array.isArray(gameData.seo) && gameData.seo.length > 0 ? (
+                gameData.seo.map((seo, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-200 rounded-xl bg-gradient-to-br from-blue-50 to-white p-6 shadow-sm"
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <Search className="size-5 text-blue-600" />
+                        <h3 className="font-medium text-gray-700">
+                          SEO #{index + 1} <Badge variant="outline">{seo.language}</Badge>
+                        </h3>
+                      </div>
+                      <Badge variant="secondary">ID: {seo.id}</Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <p className="font-medium">{seo.language}</p>
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <p className="font-medium">{seo.title}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div
+                          className="prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: seo.description || '' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Keywords</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {seo.keywords && seo.keywords.length > 0 ? (
+                          seo.keywords.map((keyword: string, idx: number) => (
+                            <Badge key={idx} variant="outline" className="bg-blue-100 text-blue-800 px-3 py-1">
+                              {keyword}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500">No keywords defined</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-6 text-center">
+                  <p className="text-gray-500">No SEO information available for this game</p>
                 </div>
               )}
             </div>

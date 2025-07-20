@@ -11,13 +11,15 @@ import {
 import { Game } from '@/types/game';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronLeft, Image as ImageIcon, Languages, Trash2, Upload } from 'lucide-react';
+import { ChevronLeft, Languages, Plus, Trash2, Upload, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import React, { useEffect, useRef, useState, KeyboardEvent } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import CategoryDialog from './dialog';
 import Image from 'next/image';
-import { Textarea } from '@/components/ui/textarea';
+import SunEditor from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css';
+import ErrorInput from '@/components/error';
 
 const EditGame = ({ gameId }: { gameId: number }) => {
   const router = useRouter();
@@ -28,6 +30,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const keywordInputRefs = useRef<HTMLInputElement[]>([]);
   const gameData: Game = data?.data;
 
   const {
@@ -36,6 +39,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
     control,
     watch,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<GameFormData>({
     resolver: zodResolver(gameSchema),
@@ -46,12 +50,21 @@ const EditGame = ({ gameId }: { gameId: number }) => {
         Array.isArray(gameData?.translations) && gameData.translations.length > 0
           ? gameData.translations
           : [{ language: 'EN', name: '', description: '' }],
+      seo:
+        Array.isArray(gameData?.seo) && gameData?.seo?.length > 0
+          ? gameData?.seo
+          : [{ language: 'EN', title: '', description: '', keywords: [] }],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: transFields, append: appendTrans, remove: removeTrans } = useFieldArray({
     control,
     name: 'translations',
+  });
+
+  const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
+    control,
+    name: 'seo',
   });
 
   const imageUrl = watch('imageUrl');
@@ -63,6 +76,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
         translations: Array.isArray(gameData.translations) && gameData.translations.length > 0
           ? gameData.translations
           : [{ language: 'EN', name: '', description: '' }],
+        seo: Array.isArray(gameData.seo) && gameData.seo.length > 0
+          ? gameData.seo
+          : [{ language: 'EN', title: '', description: '', keywords: [] }],
       });
 
       // Set initial image preview
@@ -91,25 +107,71 @@ const EditGame = ({ gameId }: { gameId: number }) => {
       imageValue = gameData.imageUrl;
     }
 
-    mutate(
-      {
-        slug: data.slug,
-        imageUrl: imageValue,
-        translations: data.translations,
+    const payload = {
+      slug: data.slug,
+      imageUrl: imageValue,
+      translations: data.translations,
+      seo: data.seo,
+    };
+
+    mutate(payload, {
+      onSuccess: () => {
+        router.push('/games');
       },
-      {
-        onSuccess: () => {
-          router.push('/games');
-        },
-      }
-    );
+    });
   };
 
   const handleImageClick = () => {
     if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Reset input
       fileInputRef.current.click();
     }
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageURL = URL.createObjectURL(file);
+      setImagePreview(imageURL);
+
+      const fileList: FileList = {
+        0: file,
+        length: 1,
+        item: (index: number) => (index === 0 ? file : null),
+      } as unknown as FileList;
+
+      setValue('imageUrl', fileList);
+    }
+  };
+
+  // Handle keyword input for SEO section
+  const handleKeywordKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const input = keywordInputRefs.current[index];
+      const value = input.value.trim();
+
+      if (value) {
+        const currentKeywords = watch(`seo.${index}.keywords`) || [];
+        if (!currentKeywords.includes(value)) {
+          setValue(`seo.${index}.keywords`, [...currentKeywords, value]);
+        }
+        input.value = '';
+      }
+    }
+  };
+
+  const removeKeyword = (index: number, keywordIndex: number) => {
+    const currentKeywords = [...(watch(`seo.${index}.keywords`) || [])];
+    currentKeywords.splice(keywordIndex, 1);
+    setValue(`seo.${index}.keywords`, currentKeywords);
+  };
+
+  // Extract ref for register + manual control
+  const {
+    ref: inputRef,
+    ...imageRest
+  } = register('imageUrl');
 
   if (isLoading) {
     return (
@@ -187,71 +249,54 @@ const EditGame = ({ gameId }: { gameId: number }) => {
             {/* Image Upload Section */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
+                <div className="w-2 h-6 bg-blue-600 rounded-full" />
                 <h2 className="text-xl font-semibold text-gray-800">Game Image</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-                <div>
-                  <Label className="text-gray-700 font-medium flex items-center gap-1">
-                    <span>Upload New Image</span>
-                  </Label>
-                  <p className="text-sm text-gray-500 mt-1 mb-2">Recommended size: 1200x630 pixels</p>
+              <div className="mt-4">
+                <div
+                  className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 min-h-[300px] flex flex-col items-center justify-center"
+                  onClick={handleImageClick}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...imageRest}
+                    ref={(e) => {
+                      inputRef(e); // react-hook-form ref
+                      fileInputRef.current = e; // manual access
+                    }}
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
 
-                  <div
-                    className="relative flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 min-h-[180px]"
-                    onClick={handleImageClick}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      {...register('imageUrl')}
-                      ref={(e) => {
-                        register('imageUrl').ref(e);
-                        if (e) fileInputRef.current = e;
-                      }}
-                      className="hidden"
-                    />
+                  {imagePreview ? (
+                    <div className="w-full max-w-3xl mx-auto aspect-video bg-white rounded-lg border shadow-sm overflow-hidden group">
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        className="object-cover w-full h-full bg-white"
+                        width={1200}
+                        height={630}
+                      />
+                    </div>
+                  ) : (
                     <div className="text-center">
                       <div className="bg-blue-100 p-3 rounded-full inline-block mb-3">
                         <Upload className="size-6 text-blue-600" />
                       </div>
-                      <p className="text-sm font-medium text-gray-700">Click to upload a new image</p>
-                      <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                      <p className="text-lg font-medium text-gray-700">Upload Game Image</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Drag & drop or click to upload
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Recommended size: 1200×630 pixels • PNG, JPG, GIF up to 10MB
+                      </p>
+                      <Button variant="outline" className="mt-4" onClick={handleImageClick}>
+                        Select Image
+                      </Button>
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-700 font-medium">Image Preview</Label>
-                  <div className="mt-1 relative group bg-gray-100 rounded-xl min-h-[200px] flex items-center justify-center">
-                    {imagePreview ? (
-                      <>
-                        <Image
-                          src={imagePreview}
-                          alt="Preview"
-                          className="mt-2 rounded-lg w-full object-cover border shadow-sm aspect-video"
-                          width={500}
-                          height={300}
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="opacity-100"
-                            onClick={handleImageClick}
-                          >
-                            Change Image
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center text-gray-400 p-6">
-                        <ImageIcon className="size-12 mb-2" />
-                        <p className="text-sm">No image selected</p>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -307,6 +352,112 @@ const EditGame = ({ gameId }: { gameId: number }) => {
               </div>
             </div>
 
+            {/* SEO Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                  <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
+                </div>
+              </div>
+              <div className="space-y-6">
+                {seoFields.map((field, index) => (
+                  <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <Languages className="size-5 text-blue-600" />
+                        <h3 className="font-medium text-gray-700">SEO #{index + 1}</h3>
+                      </div>
+                      {seoFields.length > 1 && (
+                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeSeo(index)}>
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                        <Input {...register(`seo.${index}.language` as const)} placeholder="EN" className="py-3 px-4 rounded-lg border-gray-300" />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                        <Input {...register(`seo.${index}.title` as const)} placeholder="Meta title" className="py-3 px-4 rounded-lg border-gray-300" />
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                      <Controller
+                        control={control}
+                        name={`seo.${index}.description` as const}
+                        render={({ field }) => (
+                          <SunEditor
+                            {...field}
+                            onChange={(content) => field.onChange(content)}
+                            setContents={field.value}
+                            setOptions={{
+                              height: '200',
+                              buttonList: [
+                                ['undo', 'redo'],
+                                ['formatBlock', 'fontSize'],
+                                ['bold', 'underline', 'italic', 'strike'],
+                                ['fontColor', 'hiliteColor'],
+                                ['align', 'list', 'lineHeight'],
+                                ['table', 'link', 'image', 'video'],
+                                ['fullScreen', 'showBlocks', 'codeView'],
+                              ],
+                            }}
+                          />
+                        )}
+                      />
+                      {errors.seo?.[index]?.description && (
+                        <ErrorInput>{errors.seo[index].description?.message as string}</ErrorInput>
+                      )}
+                    </div>
+
+                    {/* Keywords/Tags Section */}
+                    <div className="mt-6">
+                      <Label className="text-gray-700 mb-2 block">Keywords (Press Enter to add)</Label>
+                      <div className="border border-gray-300 rounded-lg p-2 bg-white">
+                        {/* Keyword Tags */}
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {(watch(`seo.${index}.keywords`) || []).map((keyword, keywordIndex) => (
+                            <div
+                              key={keywordIndex}
+                              className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                            >
+                              <span>{keyword}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeKeyword(index, keywordIndex)}
+                                className="text-blue-800 hover:text-blue-900"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Keyword Input */}
+                        <input
+                          type="text"
+                          placeholder="Type keyword and press Enter"
+                          className="w-full py-2 px-3 border-none focus:outline-none text-sm"
+                          onKeyDown={(e) => handleKeywordKeyDown(index, e)}
+                          ref={(el) => {
+                            if (el) keywordInputRefs.current[index] = el;
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', keywords: [] })}>
+                  <Plus className="size-4" /> Add SEO Entry
+                </Button>
+              </div>
+            </div>
+
             {/* Translations Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -319,7 +470,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                   type="button"
                   variant="outline"
                   className="flex items-center gap-2"
-                  onClick={() => append({ language: '', name: '', description: '' })}
+                  onClick={() => appendTrans({ language: '', name: '', description: '' })}
                 >
                   + Add Translation
                 </Button>
@@ -328,7 +479,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
               <p className="text-sm text-gray-500 mt-1 mb-4">Manage translations for different languages</p>
 
               <div className="space-y-6">
-                {fields.map((field, index) => (
+                {transFields.map((field, index) => (
                   <div
                     key={field.id}
                     className="border border-gray-200 rounded-xl bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm"
@@ -344,7 +495,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                         variant="ghost"
                         size="icon"
                         className="text-red-500 hover:bg-red-50"
-                        onClick={() => remove(index)}
+                        onClick={() => removeTrans(index)}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -374,13 +525,34 @@ const EditGame = ({ gameId }: { gameId: number }) => {
 
                     <div className="mt-4">
                       <Label className="text-gray-700 mb-1 block">Description</Label>
-                      <p className="text-sm text-gray-500 mb-2">Description in this language</p>
-                      <Textarea
-                        {...register(`translations.${index}.description` as const)}
-                        placeholder="Enter description"
-                        rows={3}
-                        className="w-full py-3 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      <Controller
+                        control={control}
+                        name={`translations.${index}.description`}
+                        render={({ field }) => (
+                          <SunEditor
+                            {...field}
+                            onChange={(content) => field.onChange(content)}
+                            setContents={field.value}
+                            setOptions={{
+                              height: '200',
+                              buttonList: [
+                                ['undo', 'redo'],
+                                ['formatBlock', 'fontSize'],
+                                ['bold', 'underline', 'italic', 'strike'],
+                                ['fontColor', 'hiliteColor'],
+                                ['align', 'list', 'lineHeight'],
+                                ['table', 'link', 'image', 'video'],
+                                ['fullScreen', 'showBlocks', 'codeView'],
+                              ],
+                            }}
+                          />
+                        )}
                       />
+                      {errors.translations?.[index]?.description && (
+                        <ErrorInput>
+                          {errors.translations[index].description?.message as string}
+                        </ErrorInput>
+                      )}
                     </div>
                   </div>
                 ))}

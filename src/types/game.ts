@@ -12,6 +12,11 @@ export interface Game {
   updatedAt: string;
   categories?: Category[];
   services?: Service[];
+  seo?: {
+    title: string;
+    description: string;
+    keywords: string[];
+  };
 }
 
 export interface Category {

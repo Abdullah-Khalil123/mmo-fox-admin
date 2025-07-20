@@ -24,6 +24,15 @@ export const gameSchema = z.object({
       })
     )
     .min(1, 'At least one translation is required'),
+  seo: z
+    .array(
+      z.object({
+        language: z.string().min(2, 'Language is required'),
+        title: z.string().min(1, 'Title is required'),
+        description: z.string().min(1, 'Description is required'),
+        keywords: z.array(z.string().min(1, 'Keyword is required')).min(1, 'At least one keyword is required'),
+      })
+    )
 });
 
 export type GameFormData = z.infer<typeof gameSchema>;
