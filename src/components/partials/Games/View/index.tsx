@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useGameAllDataByID } from '@/hooks/useGames';
 import { Game } from '@/types/game';
-import { ChevronLeft, Globe, Info, Search } from 'lucide-react';
+import { ChevronLeft, Globe, Info, Search, Edit, Languages, Tag, Calendar, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -27,22 +27,29 @@ const GameView = ({ gameId }: { gameId: string }) => {
     return (
       <div className="max-w-4xl mx-auto p-4 sm:p-6">
         {/* Header Skeleton */}
-        <div className="flex items-center gap-4 mb-6 sm:mb-8">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
           </div>
+          <Skeleton className="h-10 w-32" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 p-6 sm:p-8 space-y-8">
-          {/* Slug Section Skeleton */}
+          {/* Game Info Skeleton */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Skeleton className="w-2 h-6 rounded-full" />
               <Skeleton className="h-6 w-48" />
             </div>
-            <div className="grid grid-cols-1 gap-6 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div>
+                <Skeleton className="h-5 w-32 mb-2" />
+                <Skeleton className="h-10 w-full" />
+              </div>
               <div>
                 <Skeleton className="h-5 w-32 mb-2" />
                 <Skeleton className="h-10 w-full" />
@@ -50,35 +57,22 @@ const GameView = ({ gameId }: { gameId: string }) => {
             </div>
           </div>
 
-          {/* Image Section Skeleton */}
+          {/* Image Skeleton */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Skeleton className="w-2 h-6 rounded-full" />
               <Skeleton className="h-6 w-40" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-              <div>
-                <Skeleton className="h-5 w-40 mb-2" />
-                <Skeleton className="h-40 w-full rounded-xl" />
-              </div>
-              <div>
-                <Skeleton className="h-5 w-32 mb-2" />
-                <Skeleton className="h-40 w-full rounded-xl" />
-              </div>
-            </div>
+            <Skeleton className="h-64 w-full rounded-xl mt-4" />
           </div>
 
-          {/* Categories Section Skeleton */}
+          {/* Categories Skeleton */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Skeleton className="w-2 h-6 rounded-full" />
               <Skeleton className="h-6 w-40" />
             </div>
             <div className="mt-4">
-              <div className="flex justify-between items-center mb-4">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-8 w-32" />
-              </div>
               <div className="flex flex-wrap gap-2">
                 <Skeleton className="h-8 w-24 rounded-full" />
                 <Skeleton className="h-8 w-24 rounded-full" />
@@ -86,14 +80,13 @@ const GameView = ({ gameId }: { gameId: string }) => {
             </div>
           </div>
 
-          {/* Translations Section Skeleton */}
+          {/* Translations Skeleton */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Skeleton className="w-2 h-6 rounded-full" />
                 <Skeleton className="h-6 w-40" />
               </div>
-              <Skeleton className="h-8 w-40" />
             </div>
             <div className="space-y-6">
               {[...Array(2)].map((_, index) => (
@@ -102,26 +95,22 @@ const GameView = ({ gameId }: { gameId: string }) => {
                     <Skeleton className="h-6 w-32" />
                     <Skeleton className="h-6 w-6 rounded-full" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <Skeleton className="h-4 w-24 mb-2" />
                       <Skeleton className="h-8 w-full" />
                     </div>
-                    <div className="md:col-span-2">
+                    <div>
                       <Skeleton className="h-4 w-24 mb-2" />
-                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-16 w-full" />
                     </div>
-                  </div>
-                  <div className="mt-4">
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-16 w-full" />
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* SEO Section Skeleton */}
+          {/* SEO Skeleton */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -135,29 +124,41 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   <div className="flex justify-between items-center mb-4">
                     <Skeleton className="h-6 w-32" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <Skeleton className="h-4 w-24 mb-2" />
                       <Skeleton className="h-8 w-full" />
                     </div>
-                    <div className="md:col-span-2">
+                    <div>
                       <Skeleton className="h-4 w-24 mb-2" />
-                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-16 w-full" />
                     </div>
-                  </div>
-                  <div className="mt-4">
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
-                  <div className="mt-4">
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <div className="flex flex-wrap gap-2">
-                      <Skeleton className="h-6 w-16 rounded-full" />
-                      <Skeleton className="h-6 w-16 rounded-full" />
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      <div className="flex flex-wrap gap-2">
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Meta Info Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-6 w-full" />
+            </div>
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-6 w-full" />
             </div>
           </div>
         </div>
@@ -186,10 +187,8 @@ const GameView = ({ gameId }: { gameId: string }) => {
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Header with Back Button */}
-      <div
-        className="flex items-center justify-between mb-4"
-      >
-        <div className="flex items-center gap-4 mb-6 sm:mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -199,38 +198,48 @@ const GameView = ({ gameId }: { gameId: string }) => {
             <ChevronLeft className="size-5" />
           </Button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">View Game</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">{gameData.name}</h1>
             <p className="text-gray-500 mt-1 text-sm sm:text-base">Game details and information</p>
           </div>
         </div>
-        <div>
-          <Button
-            className="py-5 sm:py-6 text-base rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md flex-1"
-            onClick={() => router.push(`/games/${gameId}/edit`)}
-          >
-            Edit Game
-          </Button>
-        </div>
+        <Button
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md"
+          onClick={() => router.push(`/games/${gameId}/edit`)}
+        >
+          <Edit className="size-4" />
+          Edit Game
+        </Button>
       </div>
 
       {/* Content Container */}
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
         <div className="p-6 sm:p-8 space-y-8">
-          {/* Slug Section */}
+          {/* Game Info */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
               <h2 className="text-xl font-semibold text-gray-800">Basic Information</h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
                 <Label className="text-gray-700 font-medium flex items-center gap-1">
+                  <Globe className="size-4 text-blue-600" />
                   <span>Game Slug</span>
                 </Label>
                 <p className="text-sm text-gray-500 mt-1 mb-2">Unique identifier for the game</p>
                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                  <p className="font-medium">{gameData.slug}</p>
+                  <p className="font-mono font-medium text-gray-800">{gameData.slug}</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium flex items-center gap-1">
+                  <Tag className="size-4 text-blue-600" />
+                  <span>Game ID</span>
+                </Label>
+                <p className="text-sm text-gray-500 mt-1 mb-2">Unique identifier in our system</p>
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <p className="font-mono font-medium text-gray-800">{gameData.id}</p>
                 </div>
               </div>
             </div>
@@ -244,12 +253,12 @@ const GameView = ({ gameId }: { gameId: string }) => {
             </div>
 
             <div className="mt-4">
-              <div className="relative group bg-gray-100 rounded-xl min-h-[300px] flex items-center justify-center">
+              <div className="relative group bg-gray-100 rounded-xl min-h-[300px] flex items-center justify-center border border-gray-200 overflow-hidden">
                 {imagePreview ? (
                   <Image
                     src={imagePreview}
-                    alt="Preview"
-                    className="rounded-lg w-full object-contain border shadow-sm aspect-video"
+                    alt={gameData.name}
+                    className="object-contain w-full h-full"
                     width={800}
                     height={450}
                   />
@@ -276,18 +285,18 @@ const GameView = ({ gameId }: { gameId: string }) => {
               </div>
 
               {gameData?.categories && gameData.categories.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex flex-wrap gap-2">
                   {gameData.categories.map((cat) => (
-                    <div
+                    <Badge
                       key={cat.id}
-                      className="border border-gray-200 rounded-lg p-3 flex justify-between items-center bg-white shadow-sm"
+                      variant="outline"
+                      className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1.5"
                     >
-                      <div>
-                        <span className="font-medium text-gray-900">{cat.name}</span>
-                        <span className="text-xs text-gray-500 block">{cat.slug}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{cat.name}</span>
+                        <span className="text-xs opacity-75">({cat.slug})</span>
                       </div>
-                      <Badge variant="secondary">ID: {cat.id}</Badge>
-                    </div>
+                    </Badge>
                   ))}
                 </div>
               ) : (
@@ -318,33 +327,22 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   >
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-2">
-                        <Globe className="size-5 text-blue-600" />
+                        <Languages className="size-5 text-blue-600" />
                         <h3 className="font-medium text-gray-700">
-                          Translation #{index + 1} <Badge variant="outline">{translation.language}</Badge>
+                          Translation #{index + 1}
+                          <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                            {translation.language}
+                          </Badge>
                         </h3>
                       </div>
                       <Badge variant="secondary">ID: {translation.id}</Badge>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <p className="font-medium">{translation.language}</p>
-                        </div>
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <Label className="text-gray-700 mb-1 block">Game Name</Label>
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <p className="font-medium">{translation.name}</p>
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Description</Label>
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <Label className="text-gray-700 mb-1 block flex items-center gap-1">
+                        <span>Description</span>
+                      </Label>
+                      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 min-h-[100px]">
                         <div
                           className="prose prose-sm max-w-none"
                           dangerouslySetInnerHTML={{ __html: translation.description || '' }}
@@ -383,35 +381,35 @@ const GameView = ({ gameId }: { gameId: string }) => {
                       <div className="flex items-center gap-2">
                         <Search className="size-5 text-blue-600" />
                         <h3 className="font-medium text-gray-700">
-                          SEO #{index + 1} <Badge variant="outline">{seo.language}</Badge>
+                          SEO #{index + 1}
+                          <Badge variant="outline" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            {seo.language}
+                          </Badge>
                         </h3>
                       </div>
                       <Badge variant="secondary">ID: {seo.id}</Badge>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <p className="font-medium">{seo.language}</p>
+                          <p className="font-medium">{seo.title || '-'}</p>
                         </div>
                       </div>
 
-                      <div className="md:col-span-2">
-                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <p className="font-medium">{seo.title}</p>
+                      <div>
+                        <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 min-h-[60px]">
+                          <p className="font-medium">{seo.description || '-'}</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Meta Description</Label>
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <div
-                          className="prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ __html: seo.description || '' }}
-                        />
+                      <Label className="text-gray-700 mb-1 block">Introduction</Label>
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 min-h-[80px]">
+                        <p className="font-medium">{seo.introduction || '-'}</p>
                       </div>
                     </div>
 
@@ -420,7 +418,11 @@ const GameView = ({ gameId }: { gameId: string }) => {
                       <div className="flex flex-wrap gap-2 mt-2">
                         {seo.keywords && seo.keywords.length > 0 ? (
                           seo.keywords.map((keyword: string, idx: number) => (
-                            <Badge key={idx} variant="outline" className="bg-blue-100 text-blue-800 px-3 py-1">
+                            <Badge
+                              key={idx}
+                              variant="outline"
+                              className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1"
+                            >
                               {keyword}
                             </Badge>
                           ))
@@ -441,17 +443,27 @@ const GameView = ({ gameId }: { gameId: string }) => {
 
           {/* Meta Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <Label className="text-gray-700 font-medium block mb-2">Created At</Label>
-              <p className="text-sm font-medium">
-                {new Date(gameData.createdAt).toLocaleDateString()} at {new Date(gameData.createdAt).toLocaleTimeString()}
-              </p>
+            <div className="bg-gray-50 p-4 rounded-lg flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-full">
+                <Calendar className="size-5 text-blue-600" />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium block mb-1">Created At</Label>
+                <p className="text-sm font-medium">
+                  {new Date(gameData.createdAt).toLocaleDateString()} at {new Date(gameData.createdAt).toLocaleTimeString()}
+                </p>
+              </div>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <Label className="text-gray-700 font-medium block mb-2">Last Updated</Label>
-              <p className="text-sm font-medium">
-                {new Date(gameData.updatedAt).toLocaleDateString()} at {new Date(gameData.updatedAt).toLocaleTimeString()}
-              </p>
+            <div className="bg-gray-50 p-4 rounded-lg flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-full">
+                <RefreshCw className="size-5 text-blue-600" />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium block mb-1">Last Updated</Label>
+                <p className="text-sm font-medium">
+                  {new Date(gameData.updatedAt).toLocaleDateString()} at {new Date(gameData.updatedAt).toLocaleTimeString()}
+                </p>
+              </div>
             </div>
           </div>
 
