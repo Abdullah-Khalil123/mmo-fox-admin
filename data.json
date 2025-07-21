@@ -1,0 +1,15 @@
+{
+      "id": 1,
+      "slug": "world-of-warcraft",
+      "imageUrl": "https://example.com/wow.jpg",
+      "createdAt": "2025-07-16T08:50:27.867Z",
+      "updatedAt": "2025-07-16T08:50:27.867Z",
+      "name": {
+            "en": "World of Warcraft",
+            "ar": "عالم ووركرافت"
+      },
+      "description": {
+            "en": "An expansive MMORPG set in the high-fantasy world of Azeroth.",
+            "ar": "لعبة MMORPG واسعة النطاق تقع في عالم أزيروث الخيالي."
+      }
+}

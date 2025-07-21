@@ -11,11 +11,29 @@ export const categorySchema = z.object({
 
 export type CategoryFormData = z.infer<typeof categorySchema>;
 
+
 export const gameSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  slug: z.string().min(3, 'Slug is required'),
-  imageUrl: z.any().optional(),
-  category: z.array(categorySchema).optional(),
+  slug: z.string().min(1, 'Slug is required'),
+  imageUrl: z.any(),
+  name: z.string().min(1, 'Name is required'),
+  translations: z
+    .array(
+      z.object({
+        language: z.string().min(2, 'Language is required'),
+        description: z.string().min(1, 'Description is required'),
+      })
+    )
+    .min(1, 'At least one translation is required'),
+  seo: z
+    .array(
+      z.object({
+        language: z.string().min(2, 'Language is required'),
+        title: z.string().min(1, 'Title is required'),
+        description: z.string().min(1, 'Description is required'),
+        keywords: z.array(z.string().min(1, 'Keyword is required')).min(1, 'At least one keyword is required'),
+        introduction: z.string().min(1, 'Introduction is required'),
+      })
+    )
 });
 
 export type GameFormData = z.infer<typeof gameSchema>;

@@ -5,6 +5,7 @@ import {
   updateGame,
   createGameCategory,
   deleteGameCategory,
+  getGameAllDataByID,
 } from '@/actions/Games/actions';
 import queryClient from '@/lib/queryClient';
 import { CategoryFormData, GameFormData } from '@/types/game.schema';
@@ -21,6 +22,15 @@ export const useGameByID = (gameId: string | number) => {
   return useQuery({
     queryKey: ['game', gameId],
     queryFn: () => getGameByID(gameId),
+    enabled: !!gameId, // Only fetch if id is provided
+  });
+};
+
+export const useGameAllDataByID = (gameId: string | number) => {
+  console.log(`Fetching game data for ID: ${gameId}`);
+  return useQuery({
+    queryKey: ['gameAllData', gameId],
+    queryFn: () => getGameAllDataByID(gameId),
     enabled: !!gameId, // Only fetch if id is provided
   });
 };

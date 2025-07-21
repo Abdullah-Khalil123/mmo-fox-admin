@@ -12,7 +12,6 @@ import { useCreateGameCategory } from '@/hooks/useGames';
 import {
   CategoryFormData,
   categorySchema,
-  GameFormData,
 } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';

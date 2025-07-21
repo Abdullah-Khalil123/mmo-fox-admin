@@ -11,9 +11,31 @@ import {
 import { Game } from '@/types/game';
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { deleteGame } from '@/actions/Games/actions';
+import toast from 'react-hot-toast';
 
 const GameTable = ({ games }: { games: Game[] }) => {
   const router = useRouter();
+  // const {data, isError, isLoading} = deleteGame()
+
+
+  const handleDeleteGame = async (id: string | number) => {
+    try {
+      const response = await deleteGame(id);
+      const { status, data } = response as { status: number; data?: { message?: string } };
+      if (status !== 200) {
+        throw new Error(data?.message || 'Failed to delete game');
+      }
+      if (status === 200) {
+        // Optionally, show success message or refresh the page
+        toast.success(data?.message || 'Game deleted successfully');
+        window.location.reload(); // Refresh the page to reflect changes
+      }
+    } catch (error) {
+      // Optionally, handle error (e.g., show error message)
+      console.error('Error deleting game:', error);
+    }
+  }
 
   return (
     <div>
@@ -85,7 +107,15 @@ const GameTable = ({ games }: { games: Game[] }) => {
                   >
                     Edit
                   </Button>
-                  <Button variant="destructive" size="sm">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      if (game.id !== undefined) {
+                        handleDeleteGame(game.id);
+                      }
+                    }}
+                  >
                     Delete
                   </Button>
                 </div>

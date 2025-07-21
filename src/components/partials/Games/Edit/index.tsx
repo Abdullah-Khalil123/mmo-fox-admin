@@ -5,201 +5,627 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   useDeleteGameCategory,
-  useGameByID,
+  useGameAllDataByID,
   useUpdateGame,
 } from '@/hooks/useGames';
 import { Game } from '@/types/game';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Languages, Plus, Trash2, Upload, X, Bot } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useRef, useState, KeyboardEvent } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import CategoryDialog from './dialog';
+import Image from 'next/image';
+import SunEditor from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css';
+import ErrorInput from '@/components/error';
 
 const EditGame = ({ gameId }: { gameId: number }) => {
   const router = useRouter();
-  const { data, isLoading, isError } = useGameByID(gameId);
+  const { data, isLoading, isError } = useGameAllDataByID(gameId);
   const { mutate, isPending } = useUpdateGame(gameId);
   const { mutate: mutateCategory } = useDeleteGameCategory(gameId);
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const keywordInputRefs = useRef<HTMLInputElement[]>([]);
   const gameData: Game = data?.data;
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<GameFormData>({
+    resolver: zodResolver(gameSchema),
+    defaultValues: {
+      name: gameData?.name || '', // Added top-level name field
+      slug: gameData?.slug || '',
+      imageUrl: undefined,
+      translations:
+        Array.isArray(gameData?.translations) && gameData.translations.length > 0
+          ? gameData.translations
+          : [{ language: 'EN', description: '' }],
+      seo:
+        Array.isArray(gameData?.seo) && gameData?.seo?.length > 0
+          ? gameData?.seo
+          : [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
+    },
+  });
+
+  const { fields: transFields, append: appendTrans, remove: removeTrans } = useFieldArray({
+    control,
+    name: 'translations',
+  });
+
+  const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
+    control,
+    name: 'seo',
+  });
+
+  const imageUrl = watch('imageUrl');
+  const gameName = watch('name');
+
+  useEffect(() => {
+    if (gameData) {
+      reset({
+        name: gameData.name || '', // Set top-level name
+        slug: gameData.slug || '',
+        translations: Array.isArray(gameData.translations) && gameData.translations.length > 0
+          ? gameData.translations.map(t => ({ ...t, name: '' })) // Clear names in translations
+          : [{ language: 'EN', description: '' }],
+        seo: Array.isArray(gameData.seo) && gameData.seo.length > 0
+          ? gameData.seo.map(s => ({ ...s, introduction: s.introduction || '' }))
+          : [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
+      });
+
+      // Set initial image preview
+      if (gameData.imageUrl) {
+        setImagePreview(gameData.imageUrl);
+      }
+    }
+  }, [gameData, reset]);
+
+  useEffect(() => {
+    if (imageUrl && imageUrl.length > 0) {
+      const file = imageUrl[0] as File;
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [imageUrl]);
 
   const onSubmit = (data: GameFormData) => {
     if (isPending) return;
-    mutate(data, {
+
+    let imageValue: string | File | undefined = undefined;
+    if (data.imageUrl instanceof FileList && data.imageUrl.length > 0) {
+      imageValue = data.imageUrl[0];
+    } else if (gameData?.imageUrl) {
+      imageValue = gameData.imageUrl;
+    }
+
+    const payload = {
+      name: data.name, // Include top-level name
+      slug: data.slug,
+      imageUrl: imageValue,
+      translations: data.translations,
+      seo: data.seo,
+    };
+
+    mutate(payload, {
       onSuccess: () => {
         router.push('/games');
       },
     });
   };
 
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageURL = URL.createObjectURL(file);
+      setImagePreview(imageURL);
+
+      const fileList: FileList = {
+        0: file,
+        length: 1,
+        item: (index: number) => (index === 0 ? file : null),
+      } as unknown as FileList;
+
+      setValue('imageUrl', fileList);
+    }
+  };
+
+  // Handle keyword input for SEO section
+  const handleKeywordKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const input = keywordInputRefs.current[index];
+      const value = input.value.trim();
+
+      if (value) {
+        const currentKeywords = watch(`seo.${index}.keywords`) || [];
+        if (!currentKeywords.includes(value)) {
+          setValue(`seo.${index}.keywords`, [...currentKeywords, value]);
+        }
+        input.value = '';
+      }
+    }
+  };
+
+  const removeKeyword = (index: number, keywordIndex: number) => {
+    const currentKeywords = [...(watch(`seo.${index}.keywords`) || [])];
+    currentKeywords.splice(keywordIndex, 1);
+    setValue(`seo.${index}.keywords`, currentKeywords);
+  };
+
+  // Auto-translation functions
+  const handleAutoTranslate = (index: number, type: 'translation' | 'seo') => {
+    // In a real implementation, this would call an API
+    if (type === 'translation') {
+      setValue(`translations.${index}.description`, `Auto-translated description for ${gameName} in ${watch(`translations.${index}.language`)}`);
+    } else {
+      setValue(`seo.${index}.title`, `Auto-translated SEO title for ${gameName}`);
+      setValue(`seo.${index}.description`, `Auto-translated SEO description for ${gameName}`);
+      setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${gameName}`);
+    }
+  };
+
+  // Extract ref for register + manual control
   const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<GameFormData>({
-    resolver: zodResolver(gameSchema),
-  });
+    ref: inputRef,
+    ...imageRest
+  } = register('imageUrl');
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   } else if (isError) {
-    return <div>Error loading game data</div>;
+    return (
+      <div className="text-center py-12">
+        <div className="bg-red-100 text-red-700 rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="mt-4 text-lg font-medium text-gray-900">Error loading game data</h3>
+        <p className="mt-2 text-sm text-gray-500">Please try again later</p>
+        <Button
+          variant="outline"
+          className="mt-6"
+          onClick={() => router.push('/games')}
+        >
+          Back to Games
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white rounded-2xl shadow">
-      <ChevronLeft
-        className="bg-gray-200 p-1 size-8 rounded-full hover:bg-gray-300 cursor-pointer "
-        onClick={() => {
-          router.push('/games');
-        }}
-      />
-      <h2 className="text-2xl font-semibold tracking-tight">Edit Game</h2>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      {/* Header with Back Button */}
+      <div className="flex items-center gap-4 mb-6 sm:mb-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push('/games')}
+          className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50"
+        >
+          <ChevronLeft className="size-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Edit Game</h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">Update the details of your game</p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="name">Game Name</Label>
-            <Input
-              id="name"
-              {...register('name')}
-              placeholder="Enter game name"
-              defaultValue={gameData.name}
-            />
-          </div>
+      {/* Form Container */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="p-6 sm:p-8 space-y-8">
+            {/* Game Name and Slug */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
+                <h2 className="text-xl font-semibold text-gray-800">Game Information</h2>
+              </div>
 
-          <div>
-            <Label htmlFor="slug">Slug</Label>
-            <Input
-              id="slug"
-              {...register('slug')}
-              placeholder="Enter slug"
-              defaultValue={gameData.slug}
-            />
-          </div>
-          <div>
-            <Label>Categories</Label>
-
-            {/* Add Category Button */}
-            <div className="mt-2 flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-sm"
-                onClick={() => {
-                  setOpenDialog(true);
-                }}
-              >
-                + Add Category
-              </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <Label className="text-gray-700 font-medium">Game Name <span className="text-red-500">*</span></Label>
+                  <Input
+                    {...register('name')}
+                    placeholder="Enter game name"
+                    className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
+                </div>
+                <div>
+                  <Label className="text-gray-700 font-medium">Game Slug <span className="text-red-500">*</span></Label>
+                  <Input
+                    {...register('slug')}
+                    placeholder="Enter slug"
+                    className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {errors.slug && <p className="mt-2 text-sm text-red-600">{errors.slug.message}</p>}
+                </div>
+              </div>
             </div>
 
-            {gameData.categories && gameData.categories.length > 0 ? (
-              <div className="mt-2 space-y-2">
-                {gameData.categories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="p-3 border rounded-md bg-gray-50 flex justify-between items-center"
-                  >
-                    <div>
-                      <span className="font-medium">{cat.name}</span>
-                      <span className="text-sm text-gray-600 ml-2">
-                        ({cat.slug})
-                      </span>
+            {/* Image Upload Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                <h2 className="text-xl font-semibold text-gray-800">Game Image</h2>
+              </div>
+
+              <div className="mt-4">
+                <div
+                  className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 min-h-[300px] flex flex-col items-center justify-center"
+                  onClick={handleImageClick}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...imageRest}
+                    ref={(e) => {
+                      inputRef(e);
+                      fileInputRef.current = e;
+                    }}
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+
+                  {imagePreview ? (
+                    <div className="w-full max-w-3xl mx-auto aspect-video bg-white rounded-lg border shadow-sm overflow-hidden group">
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        className="object-cover w-full h-full bg-white"
+                        width={1200}
+                        height={630}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                        <Button variant="secondary" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          Change Image
+                        </Button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      className="cursor-pointer text-red-500 hover:text-red-700 font-bold text-xl"
-                      onClick={() => {
-                        mutateCategory(cat.id, {
-                          onSuccess: () => {
-                            console.log(
-                              `Category ${cat.name} deleted successfully`
-                            );
-                          },
-                        });
-                      }}
-                    >
-                      ×
-                    </button>
+                  ) : (
+                    <div className="text-center">
+                      <div className="bg-blue-100 p-3 rounded-full inline-block mb-3">
+                        <Upload className="size-6 text-blue-600" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-700">Upload Game Image</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Drag & drop or click to upload
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Recommended size: 1200×630 pixels • PNG, JPG, GIF up to 10MB
+                      </p>
+                      <Button variant="outline" className="mt-4" onClick={handleImageClick}>
+                        Select Image
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Categories Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
+                <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
+              </div>
+
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-gray-500">Manage game categories</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOpenDialog(true)}
+                  >
+                    + Add Category
+                  </Button>
+                </div>
+
+                {gameData?.categories && gameData.categories.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {gameData.categories.map((cat) => (
+                      <div
+                        key={cat.id}
+                        className="border border-gray-200 rounded-lg p-3 flex justify-between items-center bg-white shadow-sm"
+                      >
+                        <div>
+                          <span className="font-medium text-gray-900">{cat.name}</span>
+                          <span className="text-xs text-gray-500 block">{cat.slug}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:bg-red-50"
+                          onClick={() => mutateCategory(cat.id)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-6 text-center">
+                    <p className="text-gray-500">No categories assigned to this game</p>
+                    <p className="text-sm text-gray-400 mt-1">Add categories to organize your game</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Translations Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                  <h2 className="text-xl font-semibold text-gray-800">Translations</h2>
+                </div>
+                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendTrans({ language: 'EN', description: '' })}>
+                  <Plus className="size-4" /> Add Translation
+                </Button>
+              </div>
+              <div className="space-y-6">
+                {transFields.map((field, index) => (
+                  <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm relative">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <Languages className="size-5 text-blue-600" />
+                        <h3 className="font-medium text-gray-700">Translation #{index + 1}</h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1"
+                          onClick={() => handleAutoTranslate(index, 'translation')}
+                        >
+                          <Bot className="size-4" />
+                          Auto Translate
+                        </Button>
+                        {transFields.length > 1 && (
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeTrans(index)}>
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                        <Input
+                          {...register(`translations.${index}.language` as const)}
+                          placeholder="EN"
+                          className="py-3 px-4 rounded-lg border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Description</Label>
+                      <Controller
+                        control={control}
+                        name={`translations.${index}.description` as const}
+                        render={({ field }) => (
+                          <SunEditor
+                            {...field}
+                            onChange={(content) => field.onChange(content)}
+                            setContents={field.value}
+                            setOptions={{
+                              height: '200',
+                              buttonList: [
+                                ['undo', 'redo'],
+                                ['formatBlock', 'fontSize'],
+                                ['bold', 'underline', 'italic', 'strike'],
+                                ['fontColor', 'hiliteColor'],
+                                ['align', 'list', 'lineHeight'],
+                                ['table', 'link', 'image', 'video'],
+                                ['fullScreen', 'showBlocks', 'codeView'],
+                              ],
+                            }}
+                          />
+                        )}
+                      />
+                      {errors.translations?.[index]?.description && (
+                        <ErrorInput>{errors.translations[index].description?.message as string}</ErrorInput>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-gray-500 mt-2">
-                No categories available
-              </p>
-            )}
-          </div>
+            </div>
 
-          <div>
-            <Label htmlFor="imageUrl">Current Image URL</Label>
-            <Input
-              id="imageUrl"
-              {...register('imageUrl')}
-              placeholder="Enter image URL"
-              defaultValue={gameData.imageUrl}
-            />
-          </div>
+            {/* SEO Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                  <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
+                </div>
+                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', introduction: '', keywords: [] })}>
+                  <Plus className="size-4" /> Add SEO Entry
+                </Button>
+              </div>
+              <div className="space-y-6">
+                {seoFields.map((field, index) => (
+                  <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <Languages className="size-5 text-blue-600" />
+                        <h3 className="font-medium text-gray-700">SEO #{index + 1}</h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1"
+                          onClick={() => handleAutoTranslate(index, 'seo')}
+                        >
+                          <Bot className="size-4" />
+                          Auto Translate
+                        </Button>
+                        {seoFields.length > 1 && (
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeSeo(index)}>
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
 
-          {/* <div>
-          <Label htmlFor="imageFile">Upload New Image</Label>
-          <Input
-            id="imageFile"
-            type="file"
-            className="cursor-pointer"
-            accept="image/*"
-          />
-        </div> */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                        <Input
+                          {...register(`seo.${index}.language` as const)}
+                          placeholder="EN"
+                          className="py-3 px-4 rounded-lg border-gray-300"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                        <Input
+                          {...register(`seo.${index}.title` as const)}
+                          placeholder="Meta title"
+                          className="py-3 px-4 rounded-lg border-gray-300"
+                        />
+                      </div>
+                    </div>
 
-          {/* {gameData.imageUrl && (
-          <div>
-            <Label>Current Image Preview</Label>
-            <div className="mt-2 p-4 border rounded-lg bg-gray-50">
-              <img
-                src={gameData.imageUrl}
-                alt={gameData.name}
-                className="max-w-full h-auto max-h-48 object-contain rounded"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                      <textarea
+                        {...register(`seo.${index}.description` as const)}
+                        placeholder="Meta description"
+                        className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
+                      />
+                      {errors.seo?.[index]?.description && (
+                        <ErrorInput>{errors.seo[index].description?.message as string}</ErrorInput>
+                      )}
+                    </div>
+
+                    {/* Introduction Field */}
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Introduction</Label>
+                      <textarea
+                        {...register(`seo.${index}.introduction` as const)}
+                        placeholder="Introduction text"
+                        className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
+                      />
+                      {errors.seo?.[index]?.introduction && (
+                        <ErrorInput>{errors.seo[index].introduction?.message as string}</ErrorInput>
+                      )}
+                    </div>
+
+                    {/* Keywords/Tags Section */}
+                    <div className="mt-6">
+                      <Label className="text-gray-700 mb-2 block">Keywords (Press Enter to add)</Label>
+                      <div className="border border-gray-300 rounded-lg p-2 bg-white">
+                        {/* Keyword Tags */}
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {(watch(`seo.${index}.keywords`) || []).map((keyword, keywordIndex) => (
+                            <div
+                              key={keywordIndex}
+                              className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                            >
+                              <span>{keyword}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeKeyword(index, keywordIndex)}
+                                className="text-blue-800 hover:text-blue-900"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Keyword Input */}
+                        <input
+                          type="text"
+                          placeholder="Type keyword and press Enter"
+                          className="w-full py-2 px-3 border-none focus:outline-none text-sm"
+                          onKeyDown={(e) => handleKeywordKeyDown(index, e)}
+                          ref={(el) => {
+                            if (el) keywordInputRefs.current[index] = el;
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Meta Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <Label className="text-gray-700 font-medium block mb-2">Created At</Label>
+                <p className="text-sm font-medium">
+                  {gameData ? new Date(gameData.createdAt).toLocaleString() : 'N/A'}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <Label className="text-gray-700 font-medium block mb-2">Last Updated</Label>
+                <p className="text-sm font-medium">
+                  {gameData ? new Date(gameData.updatedAt).toLocaleString() : 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4 flex-col sm:flex-row">
+              <Button
+                variant="outline"
+                className="py-5 sm:py-6 text-base rounded-xl border-gray-300 hover:bg-gray-50 flex-1"
+                onClick={() => router.push('/games')}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="py-5 sm:py-6 text-base rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md flex-1"
+                type="submit"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </span>
+                ) : "Update Game"}
+              </Button>
             </div>
           </div>
-        )} */}
+        </form>
+      </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-4">
-            <div>
-              <Label className="text-sm text-gray-600">Created At</Label>
-              <p className="text-sm font-medium">
-                {new Date(gameData.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-            <div>
-              <Label className="text-sm text-gray-600">Last Updated</Label>
-              <p className="text-sm font-medium">
-                {new Date(gameData.updatedAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button className="flex-1" type="submit">
-              Update Game
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={() => router.push('/games')}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </form>
       <CategoryDialog
         gameId={gameId}
         openDialog={openDialog}

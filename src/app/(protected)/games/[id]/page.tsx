@@ -3,9 +3,10 @@ import React, { use } from 'react';
 
 const GameViewPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params);
+  console.log(`Rendering GameViewPage for ID: ${id}`);
   return (
     <div>
-      <GameView id={id} />
+      <GameView gameId={id} />
     </div>
   );
 };

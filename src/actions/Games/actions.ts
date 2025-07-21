@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { axiosInstance } from '@/lib/axios';
 import { CategoryFormData, GameFormData } from '@/types/game.schema';
 import axios from 'axios';
@@ -22,6 +23,19 @@ export const getGames = async (page: number = 1, limit: number = 10) => {
 export const getGameByID = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`/game/${id}`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch game by ID'
+      );
+    }
+  }
+};
+
+export const getGameAllDataByID = async (id: string | number) => {
+  try {
+    const response = await axiosInstance.get(`/game/translate/${id}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -57,6 +71,22 @@ export const updateGame = async (
     if (axios.isAxiosError(error)) {
       return new Error(
         error.response?.data?.message || 'Failed to update game'
+      );
+    }
+  }
+};
+
+export const deleteGame = async (
+  id: string | number,
+) => {
+  try {
+    const response = await axiosInstance.delete(`/game/${id}`);
+    console.log(response)
+    return response;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return new Error(
+        error.response?.data?.message || 'Failed to delete game'
       );
     }
   }

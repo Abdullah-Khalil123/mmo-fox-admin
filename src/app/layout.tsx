@@ -5,6 +5,7 @@ import { ReduxStoreProvider } from '@/providers/redux';
 import './globals.css';
 import ReactQueryProvider from '@/providers/react-query';
 import { SessionProvider } from 'next-auth/react';
+import { Toaster } from 'react-hot-toast';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,6 +37,7 @@ export default function RootLayout({
             <ReactQueryProvider>{children}</ReactQueryProvider>
           </ReduxStoreProvider>
         </SessionProvider>
+        <Toaster />
       </body>
     </html>
   );

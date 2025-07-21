@@ -4,114 +4,430 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateGame } from '@/hooks/useGames';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Languages, Upload, X, LanguagesIcon, Bot } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, KeyboardEvent } from 'react';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import ErrorInput from '@/components/error';
+import Image from 'next/image';
+import SunEditor from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css';
 
-const AddNewGames = () => {
+export default function AddNewGames() {
   const router = useRouter();
   const { mutate, isPending } = useCreateGame();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const keywordInputRefs = useRef<HTMLInputElement[]>([]);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    control,
     watch,
+    setValue,
+    formState: { errors },
   } = useForm<GameFormData>({
     resolver: zodResolver(gameSchema),
+    defaultValues: {
+      name: '', // Added name field at top level
+      slug: '',
+      translations: [{ language: 'EN', description: '' }],
+      seo: [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
+    },
   });
+
+  const { fields: transFields, append: appendTrans, remove: removeTrans } = useFieldArray({
+    control,
+    name: 'translations',
+  });
+
+  const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
+    control,
+    name: 'seo',
+  });
+
   const imageUrl = watch('imageUrl');
+  // const gameName = watch('name');
+
   useEffect(() => {
     if (imageUrl && imageUrl.length > 0) {
       const file = imageUrl[0] as File;
       const url = URL.createObjectURL(file);
       setImagePreview(url);
-
-      // Clean up when component unmounts or new image is chosen
       return () => URL.revokeObjectURL(url);
     }
   }, [imageUrl]);
 
   const onSubmit = (data: GameFormData) => {
     const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('slug', data.slug);
+    formData.append('translations', JSON.stringify(data.translations));
+    formData.append('seo', JSON.stringify(data.seo));
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (key !== 'imageUrl') {
-        formData.append(key, value as string);
-      } else if (value instanceof FileList && value.length > 0) {
-        formData.append('game-image', value[0]);
-      }
-    });
+    if (data.imageUrl instanceof FileList && data.imageUrl.length > 0) {
+      formData.append('game-image', data.imageUrl[0]);
+    }
 
     mutate(formData, {
-      onSuccess: () => {
-        router.push('/games');
-      },
+      onSuccess: () => router.push('/games'),
     });
   };
 
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+      const fileList = { 0: file, length: 1, item: (i: number) => (i === 0 ? file : null) } as unknown as FileList;
+      setValue('imageUrl', fileList);
+    }
+  };
+
+  // Handle keyword input for SEO section
+  const handleKeywordKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const input = keywordInputRefs.current[index];
+      const value = input.value.trim();
+
+      if (value) {
+        const currentKeywords = watch(`seo.${index}.keywords`) || [];
+        if (!currentKeywords.includes(value)) {
+          setValue(`seo.${index}.keywords`, [...currentKeywords, value]);
+        }
+        input.value = '';
+      }
+    }
+  };
+
+  const removeKeyword = (index: number, keywordIndex: number) => {
+    const currentKeywords = [...(watch(`seo.${index}.keywords`) || [])];
+    currentKeywords.splice(keywordIndex, 1);
+    setValue(`seo.${index}.keywords`, currentKeywords);
+  };
+
+  // Auto-translation functions (mock implementation)
+  const handleAutoTranslate = (index: number, type: 'translation' | 'seo') => {
+    // In a real implementation, this would call an API
+    if (type === 'translation') {
+      setValue(`translations.${index}.description`, `Auto-translated description for ${watch('name')} in ${watch(`translations.${index}.language`)}`);
+    } else {
+      setValue(`seo.${index}.title`, `Auto-translated SEO title for ${watch('name')}`);
+      setValue(`seo.${index}.description`, `Auto-translated SEO description for ${watch('name')}`);
+      setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${watch('name' as const)}`);
+    }
+  };
+
+  // extract ref for file input
+  const { ref: inputRef, ...imageRest } = register('imageUrl');
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white rounded-2xl shadow">
-      <ChevronLeft
-        className="bg-gray-200 p-1 size-8 rounded-full hover:bg-gray-300 cursor-pointer "
-        onClick={() => {
-          router.push('/games');
-        }}
-      />
-      <h2 className="text-2xl font-semibold tracking-tight">Add New Game</h2>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6 sm:mb-8">
+        <Button variant="ghost" size="icon" onClick={() => router.push('/games')} className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50">
+          <ChevronLeft className="size-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Create New Game</h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">Fill in the details to add a new game to your platform</p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="name">Game Name</Label>
-            <Input {...register('name')} placeholder="Enter game name" />
-            {errors.name && <ErrorInput>{errors.name.message}</ErrorInput>}
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="p-6 sm:p-8 space-y-8">
+
+          {/* Game Name */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-6 bg-blue-600 rounded-full" />
+              <h2 className="text-xl font-semibold text-gray-800">Game Information</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div>
+                <Label className="text-gray-700 font-medium">Game Name <span className="text-red-500">*</span></Label>
+                <Input
+                  {...register('name')}
+                  placeholder="Enter game name"
+                  className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {errors.name && <ErrorInput>{errors.name.message}</ErrorInput>}
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Game Slug <span className="text-red-500">*</span></Label>
+                <Input
+                  {...register('slug')}
+                  placeholder="Enter slug"
+                  className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {errors.slug && <ErrorInput>{errors.slug.message}</ErrorInput>}
+              </div>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="slug">Slug</Label>
-            <Input {...register('slug')} placeholder="Enter slug" />
-            {errors.slug && <ErrorInput>{errors.slug.message}</ErrorInput>}
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-6 bg-blue-600 rounded-full" />
+              <h2 className="text-xl font-semibold text-gray-800">Game Image</h2>
+            </div>
+            <div className="mt-4">
+              <div onClick={handleImageClick} className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-blue-400 cursor-pointer bg-gray-50 min-h-[300px] flex items-center justify-center">
+                <input type="file" accept="image/*" {...imageRest} ref={(e) => { inputRef(e); fileInputRef.current = e; }} onChange={handleFileChange} className="hidden" />
+                {imagePreview ? (
+                  <div className="w-full max-w-3xl mx-auto aspect-video bg-white rounded-lg border shadow-sm overflow-hidden">
+                    <Image src={imagePreview} alt="Preview" width={1200} height={630} className="object-cover w-full h-full bg-white" />
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <Upload className="size-6 text-blue-600 bg-blue-100 p-3 rounded-full mb-3 inline-block" />
+                    <p className="text-lg font-medium text-gray-700">Upload Game Image</p>
+                    <p className="text-sm text-gray-500 mt-1">Drag & drop or click to upload</p>
+                    <p className="text-xs text-gray-400 mt-2">Recommended size: 1200×630 pixels • PNG, JPG, GIF up to 10MB</p>
+                    <Button variant="outline" className="mt-4" onClick={handleImageClick}>Select Image</Button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="image">Image</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              placeholder="Upload Image"
-              {...register('imageUrl')}
-            />
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="mt-2 rounded-md w-full object-cover border"
-              />
-            )}
+          {/* Translations Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                <h2 className="text-xl font-semibold text-gray-800">Translations</h2>
+              </div>
+              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendTrans({ language: 'EN', description: '' })}>
+                <Plus className="size-4" /> Add Translation
+              </Button>
+            </div>
+            <div className="space-y-6">
+              {transFields.map((field, index) => (
+                <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm relative">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                      <Languages className="size-5 text-blue-600" />
+                      <h3 className="font-medium text-gray-700">Translation #{index + 1}</h3>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => handleAutoTranslate(index, 'translation')}
+                      >
+                        <Bot className="size-4" />
+                        Auto Translate
+                      </Button>
+                      {transFields.length > 1 && (
+                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeTrans(index)}>
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                      <Input
+                        {...register(`translations.${index}.language` as const)}
+                        placeholder="EN"
+                        className="py-3 px-4 rounded-lg border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <Label className="text-gray-700 mb-1 block">Description</Label>
+                    <Controller
+                      control={control}
+                      name={`translations.${index}.description` as const}
+                      render={({ field }) => (
+                        <SunEditor
+                          {...field}
+                          onChange={(content) => field.onChange(content)}
+                          setContents={field.value}
+                          setOptions={{
+                            height: '200',
+                            buttonList: [
+                              ['undo', 'redo'],
+                              ['formatBlock', 'fontSize'],
+                              ['bold', 'underline', 'italic', 'strike'],
+                              ['fontColor', 'hiliteColor'],
+                              ['align', 'list', 'lineHeight'],
+                              ['table', 'link', 'image', 'video'],
+                              ['fullScreen', 'showBlocks', 'codeView'],
+                            ],
+                          }}
+                        />
+                      )}
+                    />
+                    {errors.translations?.[index]?.description && (
+                      <ErrorInput>{errors.translations[index].description?.message as string}</ErrorInput>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button className="flex-1" type="submit" disabled={isPending}>
-              Create Game
+          {/* SEO Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
+              </div>
+              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', introduction: '', keywords: [] })}>
+                <Plus className="size-4" /> Add SEO Entry
+              </Button>
+            </div>
+            <div className="space-y-6">
+              {seoFields.map((field, index) => (
+                <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                      <LanguagesIcon className="size-5 text-blue-600" />
+                      <h3 className="font-medium text-gray-700">SEO #{index + 1}</h3>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => handleAutoTranslate(index, 'seo')}
+                      >
+                        <Bot className="size-4" />
+                        Auto Translate
+                      </Button>
+                      {seoFields.length > 1 && (
+                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeSeo(index)}>
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                      <Input
+                        {...register(`seo.${index}.language` as const)}
+                        placeholder="EN"
+                        className="py-3 px-4 rounded-lg border-gray-300"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                      <Input
+                        {...register(`seo.${index}.title` as const)}
+                        placeholder="Meta title"
+                        className="py-3 px-4 rounded-lg border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                    <textarea
+                      {...register(`seo.${index}.description` as const)}
+                      placeholder="Meta description"
+                      className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
+                    />
+                    {errors.seo?.[index]?.description && (
+                      <ErrorInput>{errors.seo[index].description?.message as string}</ErrorInput>
+                    )}
+                  </div>
+
+                  {/* New Introduction Field */}
+                  <div className="mt-4">
+                    <Label className="text-gray-700 mb-1 block">Introduction</Label>
+                    <textarea
+                      {...register(`seo.${index}.introduction` as const)}
+                      placeholder="Introduction text"
+                      className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
+                    />
+                    {errors.seo?.[index]?.introduction && (
+                      <ErrorInput>{errors.seo[index].introduction?.message as string}</ErrorInput>
+                    )}
+                  </div>
+
+                  {/* Keywords/Tags Section */}
+                  <div className="mt-6">
+                    <Label className="text-gray-700 mb-2 block">Keywords (Press Enter to add)</Label>
+                    <div className="border border-gray-300 rounded-lg p-2 bg-white">
+                      {/* Keyword Tags */}
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {(watch(`seo.${index}.keywords`) || []).map((keyword, keywordIndex) => (
+                          <div
+                            key={keywordIndex}
+                            className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                          >
+                            <span>{keyword}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeKeyword(index, keywordIndex)}
+                              className="text-blue-800 hover:text-blue-900"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Keyword Input */}
+                      <input
+                        type="text"
+                        placeholder="Type keyword and press Enter"
+                        className="w-full py-2 px-3 border-none focus:outline-none text-sm"
+                        onKeyDown={(e) => handleKeywordKeyDown(index, e)}
+                        ref={(el) => {
+                          if (el) keywordInputRefs.current[index] = el;
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-4 pt-8 border-t border-gray-200 flex-col sm:flex-row">
+            <Button variant="outline" className="py-5 sm:py-6 text-base rounded-xl border-gray-300 hover:bg-gray-50 flex-1" onClick={() => router.push('/games')}>
+              Cancel
             </Button>
             <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={() => router.push('/games')}
+              type="submit"
+              disabled={isPending}
+              className="py-5 sm:py-6 text-base rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md flex-1"
             >
-              Cancel
+              {isPending ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating...
+                </span>
+              ) : 'Create Game'}
             </Button>
           </div>
         </div>
       </form>
     </div>
   );
-};
-
-export default AddNewGames;
+}
