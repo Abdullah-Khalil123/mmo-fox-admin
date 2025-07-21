@@ -207,28 +207,10 @@ export default function AddNewGames() {
 
                   <div className="mt-4">
                     <Label className="text-gray-700 mb-1 block">Meta Description</Label>
-                    <Controller
-                      control={control}
-                      name={`seo.${index}.description` as const}
-                      render={({ field }) => (
-                        <SunEditor
-                          {...field}
-                          onChange={(content) => field.onChange(content)}
-                          setContents={field.value}
-                          setOptions={{
-                            height: '200',
-                            buttonList: [
-                              ['undo', 'redo'],
-                              ['formatBlock', 'fontSize'],
-                              ['bold', 'underline', 'italic', 'strike'],
-                              ['fontColor', 'hiliteColor'],
-                              ['align', 'list', 'lineHeight'],
-                              ['table', 'link', 'image', 'video'],
-                              ['fullScreen', 'showBlocks', 'codeView'],
-                            ],
-                          }}
-                        />
-                      )}
+                    <textarea
+                      {...register(`seo.${index}.description` as const)}
+                      placeholder="Meta description"
+                      className="w-full py-3 px-4 rounded-lg border border-gray-300  p-2 bg-white focus:border-transparent min-h-[100px] resize-vertical"
                     />
                     {errors.seo?.[index]?.description && (
                       <ErrorInput>{errors.seo[index].description?.message as string}</ErrorInput>
