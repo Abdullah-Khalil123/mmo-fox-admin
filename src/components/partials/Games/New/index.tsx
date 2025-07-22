@@ -63,12 +63,15 @@ export default function AddNewGames() {
 
   const onSubmit = (data: GameFormData) => {
     const formData = new FormData();
+
+    console.log('Submitting data:', data, data?.imageUrl);
+    console.log(typeof data.imageUrl);
     formData.append('name', data.name);
     formData.append('slug', data.slug);
     formData.append('translations', JSON.stringify(data.translations));
     formData.append('seo', JSON.stringify(data.seo));
 
-    if (data.imageUrl instanceof FileList && data.imageUrl.length > 0) {
+    if (data.imageUrl  && data.imageUrl.length > 0) {
       formData.append('game-image', data.imageUrl[0]);
     }
 
