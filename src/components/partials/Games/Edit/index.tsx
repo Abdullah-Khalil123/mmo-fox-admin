@@ -95,26 +95,10 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const onSubmit = (data: GameFormData) => {
     if (isPending) return;
 
-    interface SeoPayload {
-      language: string;
-      title: string;
-      description: string;
-      introduction: string;
-      keywords: string[];
-    }
-
-    interface GameUpdatePayload {
-      name: string;
-      slug: string;
-      imageUrl: string | File;
-      seo: SeoPayload[];
-    }
-
-    const payload: GameUpdatePayload = {
+    const payload = {
       name: data.name,
       slug: data.slug,
-      imageUrl: data.imageUrl && data.imageUrl.length > 0 ? data.imageUrl[0] : gameData?.imageUrl,
-      seo: data.seo.map((seoItem): SeoPayload => ({
+      seo: data.seo.map(seoItem => ({
         ...seoItem,
         keywords: Array.isArray(seoItem.keywords)
           ? seoItem.keywords
@@ -122,6 +106,10 @@ const EditGame = ({ gameId }: { gameId: number }) => {
             ? seoItem.keywords.split(',').map((k) => k.trim()).filter(Boolean)
             : [],
       })),
+      imageUrl:
+        data.imageUrl && data.imageUrl.length > 0
+          ? data.imageUrl
+          : gameData?.imageUrl
     };
 
     mutate(payload, {
@@ -355,7 +343,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                   <div className="w-2 h-6 bg-blue-600 rounded-full" />
                   <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
                 </div>
-                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', introduction: '', keywords: [] })}>
+                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', introduction: '', keywords: '' })}>
                   <Plus className="size-4" /> Add SEO Entry
                 </Button>
               </div>

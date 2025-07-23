@@ -11,10 +11,14 @@ export const categorySchema = z.object({
 
 export type CategoryFormData = z.infer<typeof categorySchema>;
 
-
 export const gameSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
-  imageUrl: z.any(),
+  imageUrl: z.union([
+    z.instanceof(FileList).refine((fileList) => fileList.length > 0, {
+      message: 'Image is required',
+    }),
+    z.url('Image must be a valid URL').optional(),
+  ]),
   name: z.string().min(1, 'Name is required'),
   seo: z
     .array(
@@ -34,7 +38,7 @@ export const gameSchema = z.object({
         ),
         introduction: z.string().min(1, 'Introduction is required'),
       })
-    )
+    ),
 });
 
 export type GameFormData = z.infer<typeof gameSchema>;
@@ -42,7 +46,12 @@ export type GameFormData = z.infer<typeof gameSchema>;
 export const serviceSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   description: z.string().optional(),
-  imageUrl: z.any().optional(),
+  imageUrl: z.union([
+    z.instanceof(FileList).refine((fileList) => fileList.length > 0, {
+      message: 'Image is required',
+    }),
+    z.url('Image must be a valid URL').optional(),
+  ]),
   basePrice: z
     .number()
     .min(0, 'Base price must be a positive number')

@@ -72,7 +72,9 @@ export default function AddNewGames() {
     }
 
     const processedData: ProcessedData = {
-      ...data,
+      name: data.name,
+      slug: data.slug,
+      imageUrl: typeof data.imageUrl === 'string' ? undefined : data.imageUrl,
       seo: data.seo.map((seoItem: {
         language: string;
         title: string;
@@ -112,15 +114,15 @@ export default function AddNewGames() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setImagePreview(url);
-      const fileList = { 0: file, length: 1, item: (i: number) => (i === 0 ? file : null) } as unknown as FileList;
-      setValue('imageUrl', fileList);
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const url = URL.createObjectURL(file);
+  //     setImagePreview(url);
+  //     const fileList = { 0: file, length: 1, item: (i: number) => (i === 0 ? file : null) } as unknown as FileList;
+  //     setValue('imageUrl', fileList);
+  //   }
+  // };
 
 
 
@@ -182,32 +184,56 @@ export default function AddNewGames() {
           </div>
 
           {/* Image Upload */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-6 bg-blue-600 rounded-full" />
-              <h2 className="text-xl font-semibold text-gray-800">Game Image</h2>
-            </div>
-            <div className="mt-4">
-              <div onClick={handleImageClick} className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-blue-400 cursor-pointer bg-gray-50 min-h-[300px] flex items-center justify-center">
-                <input type="file" accept="image/*" {...imageRest} ref={(e) => { inputRef(e); fileInputRef.current = e; }} onChange={handleFileChange} className="hidden" />
-                {imagePreview ? (
-                  <div className="w-full max-w-3xl mx-auto aspect-video bg-white rounded-lg border shadow-sm overflow-hidden">
-                    <Image src={imagePreview} alt="Preview" width={1200} height={630} className="object-cover w-full h-full bg-white" />
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <Upload className="size-6 text-blue-600 bg-blue-100 p-3 rounded-full mb-3 inline-block" />
-                    <p className="text-lg font-medium text-gray-700">Upload Game Image</p>
-                    <p className="text-sm text-gray-500 mt-1">Drag & drop or click to upload</p>
-                    <p className="text-xs text-gray-400 mt-2">Recommended size: 1200×630 pixels • PNG, JPG, GIF up to 10MB</p>
-                    <Button variant="outline" className="mt-4" onClick={handleImageClick}>Select Image</Button>
-                  </div>
-                )}
-              </div>
+          <div className="mt-4">
+            <div
+              onClick={handleImageClick}
+              className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-blue-400 cursor-pointer bg-gray-50 min-h-[300px] flex items-center justify-center"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                {...imageRest}
+                ref={(e) => {
+                  inputRef(e);
+                  fileInputRef.current = e;
+                }}
+                // onChange={handleFileChange}
+                className="hidden"
+              />
+              {imagePreview ? (
+                <div className="w-full max-w-3xl mx-auto aspect-video bg-white rounded-lg border shadow-sm overflow-hidden">
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    width={1200}
+                    height={630}
+                    className="object-cover w-full h-full bg-white"
+                  />
+                </div>
+              ) : (
+                <div className="text-center">
+                  <Upload className="size-6 text-blue-600 bg-blue-100 p-3 rounded-full mb-3 inline-block" />
+                  <p className="text-lg font-medium text-gray-700">
+                    Upload Game Image
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Drag & drop or click to upload
+                  </p>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Recommended size: 1200×630 pixels • PNG, JPG, GIF up to
+                    10MB
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={handleImageClick}
+                  >
+                    Select Image
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
-
-
 
           {/* SEO Section */}
           <div className="space-y-4">
@@ -310,11 +336,11 @@ export default function AddNewGames() {
 
                   {/* Keywords/Tags Section */}
                   <div className="mt-6">
-                    {/* Keyword Input */}
                     <div className="mt-4">
                       <Label className="text-gray-700 mb-1 block">Keywords</Label>
                       <p className="text-sm text-gray-500 mb-2">Comma-separated list of keywords</p>
                       <Input
+                        {...register(`seo.${index}.keywords` as const)}
                         placeholder="keyword1, keyword2, keyword3"
                         className="py-3 px-4 rounded-lg border-gray-300"
                       />
