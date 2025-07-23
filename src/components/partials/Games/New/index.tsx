@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateGame } from '@/hooks/useGames';
-import { ChevronLeft, Plus, Trash2, Languages, Upload, X, LanguagesIcon, Bot } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Upload, LanguagesIcon, Bot } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState, useRef, KeyboardEvent } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import ErrorInput from '@/components/error';
 import Image from 'next/image';
@@ -20,7 +20,6 @@ export default function AddNewGames() {
   const { mutate, isPending } = useCreateGame();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const keywordInputRefs = useRef<HTMLInputElement[]>([]);
 
   const {
     register,
@@ -34,14 +33,8 @@ export default function AddNewGames() {
     defaultValues: {
       name: '', // Added name field at top level
       slug: '',
-      translations: [{ language: 'EN', description: '' }],
       seo: [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
     },
-  });
-
-  const { fields: transFields, append: appendTrans, remove: removeTrans } = useFieldArray({
-    control,
-    name: 'translations',
   });
 
   const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
@@ -62,16 +55,48 @@ export default function AddNewGames() {
   }, [imageUrl]);
 
   const onSubmit = (data: GameFormData) => {
+
+    interface ProcessedSeoItem {
+      language: string;
+      title: string;
+      description: string;
+      introduction: string;
+      keywords: string[];
+    }
+
+    interface ProcessedData {
+      name: string;
+      slug: string;
+      imageUrl?: FileList;
+      seo: ProcessedSeoItem[];
+    }
+
+    const processedData: ProcessedData = {
+      ...data,
+      seo: data.seo.map((seoItem: {
+        language: string;
+        title: string;
+        description: string;
+        introduction: string;
+        keywords?: string | string[];
+      }): ProcessedSeoItem => ({
+        ...seoItem,
+        keywords: typeof seoItem.keywords === 'string'
+          ? seoItem.keywords.split(',').map((k: string) => k.trim())
+          : Array.isArray(seoItem.keywords) ? seoItem.keywords : []
+      }))
+    };
+
     const formData = new FormData();
 
+    console.log("Processed data:", processedData);
     console.log('Submitting data:', data, data?.imageUrl);
     console.log(typeof data.imageUrl);
-    formData.append('name', data.name);
-    formData.append('slug', data.slug);
-    formData.append('translations', JSON.stringify(data.translations));
-    formData.append('seo', JSON.stringify(data.seo));
+    formData.append('name', processedData.name);
+    formData.append('slug', processedData.slug);
+    formData.append('seo', JSON.stringify(processedData.seo));
 
-    if (data.imageUrl  && data.imageUrl.length > 0) {
+    if (data.imageUrl && data.imageUrl.length > 0) {
       formData.append('game-image', data.imageUrl[0]);
     }
 
@@ -97,39 +122,16 @@ export default function AddNewGames() {
     }
   };
 
-  // Handle keyword input for SEO section
-  const handleKeywordKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const input = keywordInputRefs.current[index];
-      const value = input.value.trim();
 
-      if (value) {
-        const currentKeywords = watch(`seo.${index}.keywords`) || [];
-        if (!currentKeywords.includes(value)) {
-          setValue(`seo.${index}.keywords`, [...currentKeywords, value]);
-        }
-        input.value = '';
-      }
-    }
-  };
-
-  const removeKeyword = (index: number, keywordIndex: number) => {
-    const currentKeywords = [...(watch(`seo.${index}.keywords`) || [])];
-    currentKeywords.splice(keywordIndex, 1);
-    setValue(`seo.${index}.keywords`, currentKeywords);
-  };
 
   // Auto-translation functions (mock implementation)
-  const handleAutoTranslate = (index: number, type: 'translation' | 'seo') => {
+  const handleAutoTranslate = (index: number) => {
     // In a real implementation, this would call an API
-    if (type === 'translation') {
-      setValue(`translations.${index}.description`, `Auto-translated description for ${watch('name')} in ${watch(`translations.${index}.language`)}`);
-    } else {
-      setValue(`seo.${index}.title`, `Auto-translated SEO title for ${watch('name')}`);
-      setValue(`seo.${index}.description`, `Auto-translated SEO description for ${watch('name')}`);
-      setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${watch('name' as const)}`);
-    }
+
+    setValue(`seo.${index}.title`, `Auto-translated SEO title for ${watch('name')}`);
+    setValue(`seo.${index}.description`, `Auto-translated SEO description for ${watch('name')}`);
+    setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${watch('name' as const)}`);
+
   };
 
   // extract ref for file input
@@ -205,87 +207,7 @@ export default function AddNewGames() {
             </div>
           </div>
 
-          {/* Translations Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-6 bg-blue-600 rounded-full" />
-                <h2 className="text-xl font-semibold text-gray-800">Translations</h2>
-              </div>
-              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendTrans({ language: 'EN', description: '' })}>
-                <Plus className="size-4" /> Add Translation
-              </Button>
-            </div>
-            <div className="space-y-6">
-              {transFields.map((field, index) => (
-                <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm relative">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-2">
-                      <Languages className="size-5 text-blue-600" />
-                      <h3 className="font-medium text-gray-700">Translation #{index + 1}</h3>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-1"
-                        onClick={() => handleAutoTranslate(index, 'translation')}
-                      >
-                        <Bot className="size-4" />
-                        Auto Translate
-                      </Button>
-                      {transFields.length > 1 && (
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeTrans(index)}>
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label className="text-gray-700 mb-1 block">Language Code</Label>
-                      <Input
-                        {...register(`translations.${index}.language` as const)}
-                        placeholder="EN"
-                        className="py-3 px-4 rounded-lg border-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <Label className="text-gray-700 mb-1 block">Description</Label>
-                    <Controller
-                      control={control}
-                      name={`translations.${index}.description` as const}
-                      render={({ field }) => (
-                        <SunEditor
-                          {...field}
-                          onChange={(content) => field.onChange(content)}
-                          setContents={field.value}
-                          setOptions={{
-                            height: '200',
-                            buttonList: [
-                              ['undo', 'redo'],
-                              ['formatBlock', 'fontSize'],
-                              ['bold', 'underline', 'italic', 'strike'],
-                              ['fontColor', 'hiliteColor'],
-                              ['align', 'list', 'lineHeight'],
-                              ['table', 'link', 'image', 'video'],
-                              ['fullScreen', 'showBlocks', 'codeView'],
-                            ],
-                          }}
-                        />
-                      )}
-                    />
-                    {errors.translations?.[index]?.description && (
-                      <ErrorInput>{errors.translations[index].description?.message as string}</ErrorInput>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* SEO Section */}
           <div className="space-y-4">
@@ -311,7 +233,7 @@ export default function AddNewGames() {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => handleAutoTranslate(index, 'seo')}
+                        onClick={() => handleAutoTranslate(index)}
                       >
                         <Bot className="size-4" />
                         Auto Translate
@@ -357,11 +279,29 @@ export default function AddNewGames() {
 
                   {/* New Introduction Field */}
                   <div className="mt-4">
-                    <Label className="text-gray-700 mb-1 block">Introduction</Label>
-                    <textarea
-                      {...register(`seo.${index}.introduction` as const)}
-                      placeholder="Introduction text"
-                      className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
+                    <Label className="text-gray-700 mb-1 block">Game Introduction</Label>
+                    <Controller
+                      control={control}
+                      name={`seo.${index}.introduction` as const}
+                      render={({ field }) => (
+                        <SunEditor
+                          {...field}
+                          onChange={(content) => field.onChange(content)}
+                          setContents={field.value}
+                          setOptions={{
+                            height: '200',
+                            buttonList: [
+                              ['undo', 'redo'],
+                              ['formatBlock', 'fontSize'],
+                              ['bold', 'underline', 'italic', 'strike'],
+                              ['fontColor', 'hiliteColor'],
+                              ['align', 'list', 'lineHeight'],
+                              ['table', 'link', 'image', 'video'],
+                              ['fullScreen', 'showBlocks', 'codeView'],
+                            ],
+                          }}
+                        />
+                      )}
                     />
                     {errors.seo?.[index]?.introduction && (
                       <ErrorInput>{errors.seo[index].introduction?.message as string}</ErrorInput>
@@ -370,36 +310,13 @@ export default function AddNewGames() {
 
                   {/* Keywords/Tags Section */}
                   <div className="mt-6">
-                    <Label className="text-gray-700 mb-2 block">Keywords (Press Enter to add)</Label>
-                    <div className="border border-gray-300 rounded-lg p-2 bg-white">
-                      {/* Keyword Tags */}
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {(watch(`seo.${index}.keywords`) || []).map((keyword, keywordIndex) => (
-                          <div
-                            key={keywordIndex}
-                            className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                          >
-                            <span>{keyword}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeKeyword(index, keywordIndex)}
-                              className="text-blue-800 hover:text-blue-900"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Keyword Input */}
-                      <input
-                        type="text"
-                        placeholder="Type keyword and press Enter"
-                        className="w-full py-2 px-3 border-none focus:outline-none text-sm"
-                        onKeyDown={(e) => handleKeywordKeyDown(index, e)}
-                        ref={(el) => {
-                          if (el) keywordInputRefs.current[index] = el;
-                        }}
+                    {/* Keyword Input */}
+                    <div className="mt-4">
+                      <Label className="text-gray-700 mb-1 block">Keywords</Label>
+                      <p className="text-sm text-gray-500 mb-2">Comma-separated list of keywords</p>
+                      <Input
+                        placeholder="keyword1, keyword2, keyword3"
+                        className="py-3 px-4 rounded-lg border-gray-300"
                       />
                     </div>
                   </div>

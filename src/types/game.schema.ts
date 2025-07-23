@@ -16,21 +16,22 @@ export const gameSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
   imageUrl: z.any(),
   name: z.string().min(1, 'Name is required'),
-  translations: z
-    .array(
-      z.object({
-        language: z.string().min(2, 'Language is required'),
-        description: z.string().min(1, 'Description is required'),
-      })
-    )
-    .min(1, 'At least one translation is required'),
   seo: z
     .array(
       z.object({
         language: z.string().min(2, 'Language is required'),
         title: z.string().min(1, 'Title is required'),
         description: z.string().min(1, 'Description is required'),
-        keywords: z.array(z.string().min(1, 'Keyword is required')).min(1, 'At least one keyword is required'),
+        keywords: z.union([
+          z.string(), // comma-separated string
+          z.array(z.string().min(1, 'Keyword is required')),
+        ]).refine(
+          (val) => {
+            if (typeof val === 'string') return val.trim().length > 0;
+            return Array.isArray(val) && val.length > 0;
+          },
+          { message: 'At least one keyword is required' }
+        ),
         introduction: z.string().min(1, 'Introduction is required'),
       })
     )

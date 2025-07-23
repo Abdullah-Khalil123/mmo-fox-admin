@@ -11,9 +11,9 @@ import {
 import { Game } from '@/types/game';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronLeft, Languages, Plus, Trash2, Upload, X, Bot } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Upload, Bot, Languages } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState, KeyboardEvent } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import CategoryDialog from './dialog';
 import Image from 'next/image';
@@ -30,7 +30,6 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const keywordInputRefs = useRef<HTMLInputElement[]>([]);
   const gameData: Game = data?.data;
 
   const {
@@ -44,23 +43,16 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   } = useForm<GameFormData>({
     resolver: zodResolver(gameSchema),
     defaultValues: {
-      name: gameData?.name || '', // Added top-level name field
+      name: gameData?.name || '',
       slug: gameData?.slug || '',
       imageUrl: undefined,
-      translations:
-        Array.isArray(gameData?.translations) && gameData.translations.length > 0
-          ? gameData.translations
-          : [{ language: 'EN', description: '' }],
-      seo:
-        Array.isArray(gameData?.seo) && gameData?.seo?.length > 0
-          ? gameData?.seo
-          : [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
+      seo: Array.isArray(gameData?.seo) && gameData?.seo?.length > 0
+        ? gameData?.seo.map(s => ({
+          ...s,
+          keywords: s.keywords?.join(', ') || ''
+        }))
+        : [{ language: 'EN', title: '', description: '', introduction: '', keywords: '' }],
     },
-  });
-
-  const { fields: transFields, append: appendTrans, remove: removeTrans } = useFieldArray({
-    control,
-    name: 'translations',
   });
 
   const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
@@ -74,17 +66,17 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   useEffect(() => {
     if (gameData) {
       reset({
-        name: gameData.name || '', // Set top-level name
+        name: gameData.name || '',
         slug: gameData.slug || '',
-        translations: Array.isArray(gameData.translations) && gameData.translations.length > 0
-          ? gameData.translations.map(t => ({ ...t, name: '' })) // Clear names in translations
-          : [{ language: 'EN', description: '' }],
         seo: Array.isArray(gameData.seo) && gameData.seo.length > 0
-          ? gameData.seo.map(s => ({ ...s, introduction: s.introduction || '' }))
-          : [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
+          ? gameData.seo.map(s => ({
+            ...s,
+            keywords: s.keywords?.join(', ') || '',
+            introduction: s.introduction || ''
+          }))
+          : [{ language: 'EN', title: '', description: '', introduction: '', keywords: '' }],
       });
 
-      // Set initial image preview
       if (gameData.imageUrl) {
         setImagePreview(gameData.imageUrl);
       }
@@ -103,19 +95,33 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const onSubmit = (data: GameFormData) => {
     if (isPending) return;
 
-    let imageValue: string | File | undefined = undefined;
-    if (data.imageUrl instanceof FileList && data.imageUrl.length > 0) {
-      imageValue = data.imageUrl[0];
-    } else if (gameData?.imageUrl) {
-      imageValue = gameData.imageUrl;
+    interface SeoPayload {
+      language: string;
+      title: string;
+      description: string;
+      introduction: string;
+      keywords: string[];
     }
 
-    const payload = {
-      name: data.name, // Include top-level name
+    interface GameUpdatePayload {
+      name: string;
+      slug: string;
+      imageUrl: string | File;
+      seo: SeoPayload[];
+    }
+
+    const payload: GameUpdatePayload = {
+      name: data.name,
       slug: data.slug,
-      imageUrl: imageValue,
-      translations: data.translations,
-      seo: data.seo,
+      imageUrl: data.imageUrl && data.imageUrl.length > 0 ? data.imageUrl[0] : gameData?.imageUrl,
+      seo: data.seo.map((seoItem): SeoPayload => ({
+        ...seoItem,
+        keywords: Array.isArray(seoItem.keywords)
+          ? seoItem.keywords
+          : typeof seoItem.keywords === 'string'
+            ? seoItem.keywords.split(',').map((k) => k.trim()).filter(Boolean)
+            : [],
+      })),
     };
 
     mutate(payload, {
@@ -135,55 +141,19 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageURL = URL.createObjectURL(file);
-      setImagePreview(imageURL);
-
-      const fileList: FileList = {
-        0: file,
-        length: 1,
-        item: (index: number) => (index === 0 ? file : null),
-      } as unknown as FileList;
-
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+      const fileList = { 0: file, length: 1, item: (i: number) => (i === 0 ? file : null) } as unknown as FileList;
       setValue('imageUrl', fileList);
     }
   };
 
-  // Handle keyword input for SEO section
-  const handleKeywordKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const input = keywordInputRefs.current[index];
-      const value = input.value.trim();
-
-      if (value) {
-        const currentKeywords = watch(`seo.${index}.keywords`) || [];
-        if (!currentKeywords.includes(value)) {
-          setValue(`seo.${index}.keywords`, [...currentKeywords, value]);
-        }
-        input.value = '';
-      }
-    }
+  const handleAutoTranslate = (index: number) => {
+    setValue(`seo.${index}.title`, `Auto-translated SEO title for ${gameName}`);
+    setValue(`seo.${index}.description`, `Auto-translated SEO description for ${gameName}`);
+    setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${gameName}`);
   };
 
-  const removeKeyword = (index: number, keywordIndex: number) => {
-    const currentKeywords = [...(watch(`seo.${index}.keywords`) || [])];
-    currentKeywords.splice(keywordIndex, 1);
-    setValue(`seo.${index}.keywords`, currentKeywords);
-  };
-
-  // Auto-translation functions
-  const handleAutoTranslate = (index: number, type: 'translation' | 'seo') => {
-    // In a real implementation, this would call an API
-    if (type === 'translation') {
-      setValue(`translations.${index}.description`, `Auto-translated description for ${gameName} in ${watch(`translations.${index}.language`)}`);
-    } else {
-      setValue(`seo.${index}.title`, `Auto-translated SEO title for ${gameName}`);
-      setValue(`seo.${index}.description`, `Auto-translated SEO description for ${gameName}`);
-      setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${gameName}`);
-    }
-  };
-
-  // Extract ref for register + manual control
   const {
     ref: inputRef,
     ...imageRest
@@ -378,88 +348,6 @@ const EditGame = ({ gameId }: { gameId: number }) => {
               </div>
             </div>
 
-            {/* Translations Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-6 bg-blue-600 rounded-full" />
-                  <h2 className="text-xl font-semibold text-gray-800">Translations</h2>
-                </div>
-                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendTrans({ language: 'EN', description: '' })}>
-                  <Plus className="size-4" /> Add Translation
-                </Button>
-              </div>
-              <div className="space-y-6">
-                {transFields.map((field, index) => (
-                  <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm relative">
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex items-center gap-2">
-                        <Languages className="size-5 text-blue-600" />
-                        <h3 className="font-medium text-gray-700">Translation #{index + 1}</h3>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-1"
-                          onClick={() => handleAutoTranslate(index, 'translation')}
-                        >
-                          <Bot className="size-4" />
-                          Auto Translate
-                        </Button>
-                        {transFields.length > 1 && (
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeTrans(index)}>
-                            <Trash2 className="size-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
-                        <Input
-                          {...register(`translations.${index}.language` as const)}
-                          placeholder="EN"
-                          className="py-3 px-4 rounded-lg border-gray-300"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Description</Label>
-                      <Controller
-                        control={control}
-                        name={`translations.${index}.description` as const}
-                        render={({ field }) => (
-                          <SunEditor
-                            {...field}
-                            onChange={(content) => field.onChange(content)}
-                            setContents={field.value}
-                            setOptions={{
-                              height: '200',
-                              buttonList: [
-                                ['undo', 'redo'],
-                                ['formatBlock', 'fontSize'],
-                                ['bold', 'underline', 'italic', 'strike'],
-                                ['fontColor', 'hiliteColor'],
-                                ['align', 'list', 'lineHeight'],
-                                ['table', 'link', 'image', 'video'],
-                                ['fullScreen', 'showBlocks', 'codeView'],
-                              ],
-                            }}
-                          />
-                        )}
-                      />
-                      {errors.translations?.[index]?.description && (
-                        <ErrorInput>{errors.translations[index].description?.message as string}</ErrorInput>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* SEO Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -484,7 +372,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-1"
-                          onClick={() => handleAutoTranslate(index, 'seo')}
+                          onClick={() => handleAutoTranslate(index)}
                         >
                           <Bot className="size-4" />
                           Auto Translate
@@ -530,11 +418,29 @@ const EditGame = ({ gameId }: { gameId: number }) => {
 
                     {/* Introduction Field */}
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Introduction</Label>
-                      <textarea
-                        {...register(`seo.${index}.introduction` as const)}
-                        placeholder="Introduction text"
-                        className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
+                      <Label className="text-gray-700 mb-1 block">Game Introduction</Label>
+                      <Controller
+                        control={control}
+                        name={`seo.${index}.introduction` as const}
+                        render={({ field }) => (
+                          <SunEditor
+                            {...field}
+                            onChange={(content) => field.onChange(content)}
+                            setContents={field.value}
+                            setOptions={{
+                              height: '200',
+                              buttonList: [
+                                ['undo', 'redo'],
+                                ['formatBlock', 'fontSize'],
+                                ['bold', 'underline', 'italic', 'strike'],
+                                ['fontColor', 'hiliteColor'],
+                                ['align', 'list', 'lineHeight'],
+                                ['table', 'link', 'image', 'video'],
+                                ['fullScreen', 'showBlocks', 'codeView'],
+                              ],
+                            }}
+                          />
+                        )}
                       />
                       {errors.seo?.[index]?.introduction && (
                         <ErrorInput>{errors.seo[index].introduction?.message as string}</ErrorInput>
@@ -543,36 +449,13 @@ const EditGame = ({ gameId }: { gameId: number }) => {
 
                     {/* Keywords/Tags Section */}
                     <div className="mt-6">
-                      <Label className="text-gray-700 mb-2 block">Keywords (Press Enter to add)</Label>
-                      <div className="border border-gray-300 rounded-lg p-2 bg-white">
-                        {/* Keyword Tags */}
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {(watch(`seo.${index}.keywords`) || []).map((keyword, keywordIndex) => (
-                            <div
-                              key={keywordIndex}
-                              className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                            >
-                              <span>{keyword}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeKeyword(index, keywordIndex)}
-                                className="text-blue-800 hover:text-blue-900"
-                              >
-                                <X size={14} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Keyword Input */}
-                        <input
-                          type="text"
-                          placeholder="Type keyword and press Enter"
-                          className="w-full py-2 px-3 border-none focus:outline-none text-sm"
-                          onKeyDown={(e) => handleKeywordKeyDown(index, e)}
-                          ref={(el) => {
-                            if (el) keywordInputRefs.current[index] = el;
-                          }}
+                      <div className="mt-4">
+                        <Label className="text-gray-700 mb-1 block">Keywords</Label>
+                        <p className="text-sm text-gray-500 mb-2">Comma-separated list of keywords</p>
+                        <Input
+                          {...register(`seo.${index}.keywords` as const)}
+                          placeholder="keyword1, keyword2, keyword3"
+                          className="py-3 px-4 rounded-lg border-gray-300"
                         />
                       </div>
                     </div>
