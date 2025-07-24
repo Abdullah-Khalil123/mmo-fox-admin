@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState, useRef } from 'react';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import ErrorInput from '@/components/error';
-import Image from 'next/image';
+import Image from 'next/image'; 
 import SunEditor from 'suneditor-react';
 import 'suneditor/dist/css/suneditor.min.css';
 
@@ -33,7 +33,7 @@ export default function AddNewGames() {
     defaultValues: {
       name: '', // Added name field at top level
       slug: '',
-      seo: [{ language: 'EN', title: '', description: '', introduction: '', keywords: [] }],
+      seo: [{ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] }],
     },
   });
 
@@ -58,8 +58,8 @@ export default function AddNewGames() {
 
     interface ProcessedSeoItem {
       language: string;
-      title: string;
-      description: string;
+      metaTitle: string;
+      metaDescription: string;
       introduction: string;
       keywords: string[];
     }
@@ -77,8 +77,8 @@ export default function AddNewGames() {
       imageUrl: typeof data.imageUrl === 'string' ? undefined : data.imageUrl,
       seo: data.seo.map((seoItem: {
         language: string;
-        title: string;
-        description: string;
+        metaTitle: string;
+        metaDescription: string;
         introduction: string;
         keywords?: string | string[];
       }): ProcessedSeoItem => ({
@@ -130,8 +130,8 @@ export default function AddNewGames() {
   const handleAutoTranslate = (index: number) => {
     // In a real implementation, this would call an API
 
-    setValue(`seo.${index}.title`, `Auto-translated SEO title for ${watch('name')}`);
-    setValue(`seo.${index}.description`, `Auto-translated SEO description for ${watch('name')}`);
+    setValue(`seo.${index}.metaTitle`, `Auto-translated SEO title for ${watch('name')}`);
+    setValue(`seo.${index}.metaDescription`, `Auto-translated SEO description for ${watch('name')}`);
     setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${watch('name' as const)}`);
 
   };
@@ -242,7 +242,7 @@ export default function AddNewGames() {
                 <div className="w-2 h-6 bg-blue-600 rounded-full" />
                 <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
               </div>
-              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', introduction: '', keywords: [] })}>
+              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] })}>
                 <Plus className="size-4" /> Add SEO Entry
               </Button>
             </div>
@@ -284,7 +284,7 @@ export default function AddNewGames() {
                     <div className="md:col-span-2">
                       <Label className="text-gray-700 mb-1 block">Meta Title</Label>
                       <Input
-                        {...register(`seo.${index}.title` as const)}
+                        {...register(`seo.${index}.metaTitle` as const)}
                         placeholder="Meta title"
                         className="py-3 px-4 rounded-lg border-gray-300"
                       />
@@ -294,12 +294,12 @@ export default function AddNewGames() {
                   <div className="mt-4">
                     <Label className="text-gray-700 mb-1 block">Meta Description</Label>
                     <textarea
-                      {...register(`seo.${index}.description` as const)}
+                      {...register(`seo.${index}.metaDescription` as const)}
                       placeholder="Meta description"
                       className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
                     />
-                    {errors.seo?.[index]?.description && (
-                      <ErrorInput>{errors.seo[index].description?.message as string}</ErrorInput>
+                    {errors.seo?.[index]?.metaDescription && (
+                      <ErrorInput>{errors.seo[index].metaDescription?.message as string}</ErrorInput>
                     )}
                   </div>
 

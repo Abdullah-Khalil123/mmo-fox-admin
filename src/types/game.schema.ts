@@ -24,8 +24,8 @@ export const gameSchema = z.object({
     .array(
       z.object({
         language: z.string().min(2, 'Language is required'),
-        title: z.string().min(1, 'Title is required'),
-        description: z.string().min(1, 'Description is required'),
+        metaTitle: z.string().min(1, 'Title is required'),
+        metaDescription: z.string().min(1, 'Description is required'),
         keywords: z.union([
           z.string(), // comma-separated string
           z.array(z.string().min(1, 'Keyword is required')),
