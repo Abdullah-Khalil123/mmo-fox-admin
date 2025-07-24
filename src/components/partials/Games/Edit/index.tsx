@@ -137,8 +137,8 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   };
 
   const handleAutoTranslate = (index: number) => {
-    setValue(`seo.${index}.title`, `Auto-translated SEO title for ${gameName}`);
-    setValue(`seo.${index}.description`, `Auto-translated SEO description for ${gameName}`);
+    setValue(`seo.${index}.metaTitle`, `Auto-translated SEO title for ${gameName}`);
+    setValue(`seo.${index}.metaDescription`, `Auto-translated SEO description for ${gameName}`);
     setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${gameName}`);
   };
 
@@ -343,7 +343,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                   <div className="w-2 h-6 bg-blue-600 rounded-full" />
                   <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
                 </div>
-                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', title: '', description: '', introduction: '', keywords: '' })}>
+                <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: '' })}>
                   <Plus className="size-4" /> Add SEO Entry
                 </Button>
               </div>
@@ -385,7 +385,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                       <div className="md:col-span-2">
                         <Label className="text-gray-700 mb-1 block">Meta Title</Label>
                         <Input
-                          {...register(`seo.${index}.title` as const)}
+                          {...register(`seo.${index}.metaTitle` as const)}
                           placeholder="Meta title"
                           className="py-3 px-4 rounded-lg border-gray-300"
                         />
@@ -395,12 +395,12 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                     <div className="mt-4">
                       <Label className="text-gray-700 mb-1 block">Meta Description</Label>
                       <textarea
-                        {...register(`seo.${index}.description` as const)}
+                        {...register(`seo.${index}.metaDescription` as const)}
                         placeholder="Meta description"
                         className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
                       />
-                      {errors.seo?.[index]?.description && (
-                        <ErrorInput>{errors.seo[index].description?.message as string}</ErrorInput>
+                      {errors.seo?.[index]?.metaDescription && (
+                        <ErrorInput>{errors.seo[index].metaDescription?.message as string}</ErrorInput>
                       )}
                     </div>
 
