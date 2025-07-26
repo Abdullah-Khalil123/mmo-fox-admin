@@ -45,13 +45,13 @@ const EditGame = ({ gameId }: { gameId: number }) => {
     defaultValues: {
       name: gameData?.name || '',
       slug: gameData?.slug || '',
-      imageUrl: undefined,
+      imageUrl: undefined, // Keep as undefined for file input
       seo: Array.isArray(gameData?.seo) && gameData?.seo?.length > 0
         ? gameData?.seo.map(s => ({
           ...s,
           keywords: s.keywords?.join(', ') || ''
         }))
-        : [{ language: 'EN', title: '', description: '', introduction: '', keywords: '' }],
+        : [{ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: '' }],
     },
   });
 
@@ -68,13 +68,14 @@ const EditGame = ({ gameId }: { gameId: number }) => {
       reset({
         name: gameData.name || '',
         slug: gameData.slug || '',
+        imageUrl: undefined,
         seo: Array.isArray(gameData.seo) && gameData.seo.length > 0
           ? gameData.seo.map(s => ({
             ...s,
             keywords: s.keywords?.join(', ') || '',
             introduction: s.introduction || ''
           }))
-          : [{ language: 'EN', title: '', description: '', introduction: '', keywords: '' }],
+          : [{ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: '' }],
       });
 
       if (gameData.imageUrl) {
@@ -95,24 +96,29 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const onSubmit = (data: GameFormData) => {
     if (isPending) return;
 
-    const payload = {
-      name: data.name,
-      slug: data.slug,
-      seo: data.seo.map(seoItem => ({
-        ...seoItem,
-        keywords: Array.isArray(seoItem.keywords)
-          ? seoItem.keywords
-          : typeof seoItem.keywords === 'string'
-            ? seoItem.keywords.split(',').map((k) => k.trim()).filter(Boolean)
-            : [],
-      })),
-      imageUrl:
-        data.imageUrl && data.imageUrl.length > 0
-          ? data.imageUrl
-          : gameData?.imageUrl
-    };
+    // Process SEO data
+    const processedSeo = data.seo.map(seoItem => ({
+      ...seoItem,
+      keywords: typeof seoItem.keywords === 'string'
+        ? seoItem.keywords.split(',').map(k => k.trim()).filter(Boolean)
+        : Array.isArray(seoItem.keywords) ? seoItem.keywords : []
+    }));
 
-    mutate(payload, {
+    // Build FormData so file actually travels
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('slug', data.slug);
+    formData.append('seo', JSON.stringify(processedSeo));
+    if (data.imageUrl instanceof FileList && data.imageUrl.length > 0) {
+      formData.append('game-image', data.imageUrl[0]);
+    } else if (gameData.imageUrl) {
+      // keep old URL if no new file
+      formData.append('imageUrl', gameData.imageUrl);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    mutate(formData, {
       onSuccess: () => {
         router.push('/games');
       },
@@ -131,7 +137,12 @@ const EditGame = ({ gameId }: { gameId: number }) => {
     if (file) {
       const url = URL.createObjectURL(file);
       setImagePreview(url);
-      const fileList = { 0: file, length: 1, item: (i: number) => (i === 0 ? file : null) } as unknown as FileList;
+
+      // Create a REAL FileList using DataTransfer
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      const fileList = dataTransfer.files;
+
       setValue('imageUrl', fileList);
     }
   };
@@ -211,7 +222,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                     placeholder="Enter game name"
                     className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
+                  {errors.name && <ErrorInput>{errors.name.message}</ErrorInput>}
                 </div>
                 <div>
                   <Label className="text-gray-700 font-medium">Game Slug <span className="text-red-500">*</span></Label>
@@ -220,7 +231,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                     placeholder="Enter slug"
                     className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  {errors.slug && <p className="mt-2 text-sm text-red-600">{errors.slug.message}</p>}
+                  {errors.slug && <ErrorInput>{errors.slug.message}</ErrorInput>}
                 </div>
               </div>
             </div>
@@ -258,11 +269,11 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                         width={1200}
                         height={630}
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                      {/* <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
                         <Button variant="secondary" className="opacity-0 group-hover:opacity-100 transition-opacity">
                           Change Image
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   ) : (
                     <div className="text-center">
@@ -282,6 +293,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                     </div>
                   )}
                 </div>
+                {errors.imageUrl && (
+                  <ErrorInput >{errors.imageUrl.message}</ErrorInput>
+                )}
               </div>
             </div>
 
@@ -381,6 +395,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                           placeholder="EN"
                           className="py-3 px-4 rounded-lg border-gray-300"
                         />
+                        {errors.seo?.[index]?.language && (
+                          <ErrorInput>{errors.seo[index].language?.message as string}</ErrorInput>
+                        )}
                       </div>
                       <div className="md:col-span-2">
                         <Label className="text-gray-700 mb-1 block">Meta Title</Label>
@@ -389,6 +406,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                           placeholder="Meta title"
                           className="py-3 px-4 rounded-lg border-gray-300"
                         />
+                        {errors.seo?.[index]?.metaTitle && (
+                          <ErrorInput>{errors.seo[index].metaTitle?.message as string}</ErrorInput>
+                        )}
                       </div>
                     </div>
 
@@ -445,6 +465,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                           placeholder="keyword1, keyword2, keyword3"
                           className="py-3 px-4 rounded-lg border-gray-300"
                         />
+                        {errors.seo?.[index]?.keywords && (
+                          <ErrorInput>{errors.seo[index].keywords?.message as string}</ErrorInput>
+                        )}
                       </div>
                     </div>
                   </div>

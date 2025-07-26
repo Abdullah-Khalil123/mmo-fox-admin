@@ -13,8 +13,9 @@ export interface Game {
   categories?: Category[];
   services?: Service[];
   seo?: {
-    title: string;
-    description: string;
+    metaTitle: string;
+    metaDescription: string;
+    introduction: string;
     keywords: string[];
   };
 }

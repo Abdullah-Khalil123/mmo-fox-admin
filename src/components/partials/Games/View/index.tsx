@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useGameAllDataByID } from '@/hooks/useGames';
 import { Game } from '@/types/game';
-import { ChevronLeft, Globe, Info, Search, Edit, Languages, Tag, Calendar, RefreshCw } from 'lucide-react';
+import { ChevronLeft, Globe, Info, Search, Edit, Tag, Calendar, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -273,7 +273,7 @@ const GameView = ({ gameId }: { gameId: string }) => {
           </div>
 
           {/* Categories Section */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
               <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
@@ -305,10 +305,10 @@ const GameView = ({ gameId }: { gameId: string }) => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Translations Section */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
@@ -357,7 +357,7 @@ const GameView = ({ gameId }: { gameId: string }) => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* SEO Section */}
           <div className="space-y-4">
@@ -394,14 +394,14 @@ const GameView = ({ gameId }: { gameId: string }) => {
                       <div>
                         <Label className="text-gray-700 mb-1 block">Meta Title</Label>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <p className="font-medium">{seo.title || '-'}</p>
+                          <p className="font-medium">{seo.metaTitle || '-'}</p>
                         </div>
                       </div>
 
                       <div>
                         <Label className="text-gray-700 mb-1 block">Meta Description</Label>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 min-h-[60px]">
-                          <p className="font-medium">{seo.description || '-'}</p>
+                          <p className="font-medium">{seo.metaDescription || '-'}</p>
                         </div>
                       </div>
                     </div>
@@ -409,7 +409,16 @@ const GameView = ({ gameId }: { gameId: string }) => {
                     <div className="mt-4">
                       <Label className="text-gray-700 mb-1 block">Introduction</Label>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 min-h-[80px]">
-                        <p className="font-medium">{seo.introduction || '-'}</p>
+                        <p className="font-medium">
+                          {seo?.introduction ? (
+                            <div
+                              className="prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ __html: seo.introduction }}
+                            />
+                          ) : (
+                            '-'
+                          )}
+                        </p>
                       </div>
                     </div>
 

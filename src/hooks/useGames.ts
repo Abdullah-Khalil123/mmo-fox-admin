@@ -27,7 +27,6 @@ export const useGameByID = (gameId: string | number) => {
 };
 
 export const useGameAllDataByID = (gameId: string | number) => {
-  console.log(`Fetching game data for ID: ${gameId}`);
   return useQuery({
     queryKey: ['gameAllData', gameId],
     queryFn: () => getGameAllDataByID(gameId),

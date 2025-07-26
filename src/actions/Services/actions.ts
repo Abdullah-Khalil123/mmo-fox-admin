@@ -4,7 +4,11 @@ import axios from 'axios';
 
 const getServiceById = async (serviceId: string | number) => {
   try {
-    const response = await axiosInstance.get(`/service/${serviceId}`);
+    const response = await axiosInstance.get(`/service/${serviceId}`,{
+      headers: {
+        'Accept-Language': 'EN', // Change 'en' to desired language if needed
+      },
+    });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -17,7 +21,12 @@ const getServiceById = async (serviceId: string | number) => {
 
 const getServicesByGameId = async (gameId: number | string) => {
   try {
-    const response = await axiosInstance.get(`/service/game/${gameId}`);
+    const response = await axiosInstance.get(`/service/game/${gameId}`, {
+      headers: {
+      'Accept-Language': 'EN', // Change 'en' to desired language if needed
+      },
+    });
+    console.log(`Fetching services for game ID ${gameId}`, response.data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

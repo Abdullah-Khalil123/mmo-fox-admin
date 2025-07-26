@@ -66,7 +66,7 @@ export const updateGame = async (
   gameData: GameFormData
 ) => {
   try {
-    const response = await axiosInstance.put(`/game/${id}`, gameData);
+    const response = await axiosInstance.patch(`/game/${id}`, gameData);
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return new Error(
