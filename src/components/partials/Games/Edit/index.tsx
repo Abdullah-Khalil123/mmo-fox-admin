@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  useDeleteGameCategory,
+  // useDeleteGameCategory,
   useGameAllDataByID,
   useUpdateGame,
 } from '@/hooks/useGames';
@@ -25,7 +25,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const router = useRouter();
   const { data, isLoading, isError } = useGameAllDataByID(gameId);
   const { mutate, isPending } = useUpdateGame(gameId);
-  const { mutate: mutateCategory } = useDeleteGameCategory(gameId);
+  // const { mutate: mutateCategory } = useDeleteGameCategory(gameId);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -300,7 +300,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
             </div>
 
             {/* Categories Section */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
                 <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
@@ -348,7 +348,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* SEO Section */}
             <div className="space-y-4">

@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const getServiceById = async (serviceId: string | number) => {
   try {
-    const response = await axiosInstance.get(`/service/${serviceId}`,{
+    const response = await axiosInstance.get(`/service/translate/${serviceId}`,{
       headers: {
         'Accept-Language': 'EN', // Change 'en' to desired language if needed
       },
@@ -82,7 +82,7 @@ const updateServiceById = async (
   serviceData: FormData
 ) => {
   try {
-    const response = await axiosInstance.put(
+    const response = await axiosInstance.patch(
       `/service/${serviceId}`,
       serviceData,
       {
