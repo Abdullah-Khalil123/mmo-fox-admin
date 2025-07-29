@@ -4,7 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useGameAllDataByID } from '@/hooks/useGames';
 import { Game } from '@/types/game';
-import { ChevronLeft, Globe, Info, Search, Edit, Tag, Calendar, RefreshCw } from 'lucide-react';
+import {
+  ChevronLeft,
+  Globe,
+  Info,
+  Search,
+  Edit,
+  Tag,
+  Calendar,
+  RefreshCw,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -90,7 +99,10 @@ const GameView = ({ gameId }: { gameId: string }) => {
             </div>
             <div className="space-y-6">
               {[...Array(2)].map((_, index) => (
-                <div key={index} className="border border-gray-200 rounded-xl p-6">
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-6"
+                >
                   <div className="flex justify-between items-center mb-4">
                     <Skeleton className="h-6 w-32" />
                     <Skeleton className="h-6 w-6 rounded-full" />
@@ -120,7 +132,10 @@ const GameView = ({ gameId }: { gameId: string }) => {
             </div>
             <div className="space-y-6">
               {[...Array(1)].map((_, index) => (
-                <div key={index} className="border border-gray-200 rounded-xl p-6">
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-6"
+                >
                   <div className="flex justify-between items-center mb-4">
                     <Skeleton className="h-6 w-32" />
                   </div>
@@ -172,9 +187,12 @@ const GameView = ({ gameId }: { gameId: string }) => {
         <div className="bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-300 rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-6">
           <Info className="h-10 w-10" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Game Not Found</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Game Not Found
+        </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          We couldn&apos;t find the game you&apos;re looking for. It may have been removed or doesn&apos;t exist.
+          We couldn&apos;t find the game you&apos;re looking for. It may have
+          been removed or doesn&apos;t exist.
         </p>
         <Button onClick={() => router.push('/games')}>
           <ChevronLeft className="mr-2 h-4 w-4" />
@@ -198,8 +216,12 @@ const GameView = ({ gameId }: { gameId: string }) => {
             <ChevronLeft className="size-5" />
           </Button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">{gameData.name}</h1>
-            <p className="text-gray-500 mt-1 text-sm sm:text-base">Game details and information</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+              {gameData.name}
+            </h1>
+            <p className="text-gray-500 mt-1 text-sm sm:text-base">
+              Game details and information
+            </p>
           </div>
         </div>
         <Button
@@ -218,7 +240,9 @@ const GameView = ({ gameId }: { gameId: string }) => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
-              <h2 className="text-xl font-semibold text-gray-800">Basic Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Basic Information
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -227,9 +251,13 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   <Globe className="size-4 text-blue-600" />
                   <span>Game Slug</span>
                 </Label>
-                <p className="text-sm text-gray-500 mt-1 mb-2">Unique identifier for the game</p>
+                <p className="text-sm text-gray-500 mt-1 mb-2">
+                  Unique identifier for the game
+                </p>
                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                  <p className="font-mono font-medium text-gray-800">{gameData.slug}</p>
+                  <p className="font-mono font-medium text-gray-800">
+                    {gameData.slug}
+                  </p>
                 </div>
               </div>
               <div>
@@ -237,9 +265,13 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   <Tag className="size-4 text-blue-600" />
                   <span>Game ID</span>
                 </Label>
-                <p className="text-sm text-gray-500 mt-1 mb-2">Unique identifier in our system</p>
+                <p className="text-sm text-gray-500 mt-1 mb-2">
+                  Unique identifier in our system
+                </p>
                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                  <p className="font-mono font-medium text-gray-800">{gameData.id}</p>
+                  <p className="font-mono font-medium text-gray-800">
+                    {gameData.id}
+                  </p>
                 </div>
               </div>
             </div>
@@ -249,7 +281,9 @@ const GameView = ({ gameId }: { gameId: string }) => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
-              <h2 className="text-xl font-semibold text-gray-800">Game Image</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Game Image
+              </h2>
             </div>
 
             <div className="mt-4">
@@ -364,11 +398,15 @@ const GameView = ({ gameId }: { gameId: string }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
-                <h2 className="text-xl font-semibold text-gray-800">SEO Information</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  SEO Information
+                </h2>
               </div>
             </div>
 
-            <p className="text-sm text-gray-500 mt-1 mb-4">Search engine optimization details</p>
+            <p className="text-sm text-gray-500 mt-1 mb-4">
+              Search engine optimization details
+            </p>
 
             <div className="space-y-6">
               {Array.isArray(gameData.seo) && gameData.seo.length > 0 ? (
@@ -382,7 +420,10 @@ const GameView = ({ gameId }: { gameId: string }) => {
                         <Search className="size-5 text-blue-600" />
                         <h3 className="font-medium text-gray-700">
                           SEO #{index + 1}
-                          <Badge variant="outline" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                          <Badge
+                            variant="outline"
+                            className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          >
                             {seo.language}
                           </Badge>
                         </h3>
@@ -392,38 +433,50 @@ const GameView = ({ gameId }: { gameId: string }) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                        <Label className="text-gray-700 mb-1 block">
+                          Meta Title
+                        </Label>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                           <p className="font-medium">{seo.metaTitle || '-'}</p>
                         </div>
                       </div>
 
                       <div>
-                        <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                        <Label className="text-gray-700 mb-1 block">
+                          Meta Description
+                        </Label>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 min-h-[60px]">
-                          <p className="font-medium">{seo.metaDescription || '-'}</p>
+                          <p className="font-medium">
+                            {seo.metaDescription || '-'}
+                          </p>
                         </div>
                       </div>
                     </div>
 
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Introduction</Label>
+                      <Label className="text-gray-700 mb-1 block">
+                        Introduction
+                      </Label>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 min-h-[80px]">
-                        <p className="font-medium">
+                        <div className="font-medium">
                           {seo?.introduction ? (
                             <div
                               className="prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ __html: seo.introduction }}
+                              dangerouslySetInnerHTML={{
+                                __html: seo.introduction,
+                              }}
                             />
                           ) : (
                             '-'
                           )}
-                        </p>
+                        </div>
                       </div>
                     </div>
 
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Keywords</Label>
+                      <Label className="text-gray-700 mb-1 block">
+                        Keywords
+                      </Label>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {seo.keywords && seo.keywords.length > 0 ? (
                           seo.keywords.map((keyword: string, idx: number) => (
@@ -436,7 +489,9 @@ const GameView = ({ gameId }: { gameId: string }) => {
                             </Badge>
                           ))
                         ) : (
-                          <p className="text-sm text-gray-500">No keywords defined</p>
+                          <p className="text-sm text-gray-500">
+                            No keywords defined
+                          </p>
                         )}
                       </div>
                     </div>
@@ -444,7 +499,9 @@ const GameView = ({ gameId }: { gameId: string }) => {
                 ))
               ) : (
                 <div className="bg-gray-50 rounded-lg p-6 text-center">
-                  <p className="text-gray-500">No SEO information available for this game</p>
+                  <p className="text-gray-500">
+                    No SEO information available for this game
+                  </p>
                 </div>
               )}
             </div>
@@ -457,9 +514,12 @@ const GameView = ({ gameId }: { gameId: string }) => {
                 <Calendar className="size-5 text-blue-600" />
               </div>
               <div>
-                <Label className="text-gray-700 font-medium block mb-1">Created At</Label>
+                <Label className="text-gray-700 font-medium block mb-1">
+                  Created At
+                </Label>
                 <p className="text-sm font-medium">
-                  {new Date(gameData.createdAt).toLocaleDateString()} at {new Date(gameData.createdAt).toLocaleTimeString()}
+                  {new Date(gameData.createdAt).toLocaleDateString()} at{' '}
+                  {new Date(gameData.createdAt).toLocaleTimeString()}
                 </p>
               </div>
             </div>
@@ -468,9 +528,12 @@ const GameView = ({ gameId }: { gameId: string }) => {
                 <RefreshCw className="size-5 text-blue-600" />
               </div>
               <div>
-                <Label className="text-gray-700 font-medium block mb-1">Last Updated</Label>
+                <Label className="text-gray-700 font-medium block mb-1">
+                  Last Updated
+                </Label>
                 <p className="text-sm font-medium">
-                  {new Date(gameData.updatedAt).toLocaleDateString()} at {new Date(gameData.updatedAt).toLocaleTimeString()}
+                  {new Date(gameData.updatedAt).toLocaleDateString()} at{' '}
+                  {new Date(gameData.updatedAt).toLocaleTimeString()}
                 </p>
               </div>
             </div>

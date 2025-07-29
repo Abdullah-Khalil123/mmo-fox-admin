@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, LanguagesIcon } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import SunEditor from 'suneditor-react';
@@ -11,10 +11,12 @@ import 'suneditor/dist/css/suneditor.min.css';
 import { ServiceStatus, ServiceType } from '@/types/game';
 import { useServiceById } from '@/hooks/useServices';
 
-export default function ViewGameService() {
+export default function ViewGameService({
+  serviceId,
+}: {
+  serviceId: string | number;
+}) {
   const router = useRouter();
-  const params = useParams();
-  const serviceId = params.serviceId as string;
   const { data: serviceData, isLoading } = useServiceById(serviceId);
   const [service, setService] = useState<typeof serviceData.data | null>(null);
 
@@ -37,20 +39,29 @@ export default function ViewGameService() {
 
   const getStatusText = (status: ServiceStatus) => {
     switch (status) {
-      case ServiceStatus.PUBLISHED: return 'Published';
-      case ServiceStatus.UNPUBLISHED: return 'Unpublished';
-      default: return status;
+      case ServiceStatus.PUBLISHED:
+        return 'Published';
+      case ServiceStatus.UNPUBLISHED:
+        return 'Unpublished';
+      default:
+        return status;
     }
   };
 
   const getTypeText = (type: ServiceType) => {
     switch (type) {
-      case ServiceType.COACHING: return 'Coaching';
-      case ServiceType.BOOSTING: return 'Boosting';
-      case ServiceType.LEVELING: return 'Leveling';
-      case ServiceType.CURRENCY: return 'Currency';
-      case ServiceType.OTHER: return 'Other';
-      default: return type;
+      case ServiceType.COACHING:
+        return 'Coaching';
+      case ServiceType.BOOSTING:
+        return 'Boosting';
+      case ServiceType.LEVELING:
+        return 'Leveling';
+      case ServiceType.CURRENCY:
+        return 'Currency';
+      case ServiceType.OTHER:
+        return 'Other';
+      default:
+        return type;
     }
   };
 
@@ -62,43 +73,56 @@ export default function ViewGameService() {
   ];
 
   const getVendorName = (id: string) => {
-    return vendors.find(v => v.id === id)?.name || id;
+    return vendors.find((v) => v.id === id)?.name || id;
   };
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 sm:mb-8">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50"
+        >
           <ChevronLeft className="size-5" />
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">View Game Service</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+            View Game Service
+          </h1>
           <p className="text-gray-500 mt-1 text-sm sm:text-base">
-            Viewing details for: <span className="font-medium text-gray-900">{service.name}</span>
+            Viewing details for:{' '}
+            <span className="font-medium text-gray-900">{service.name}</span>
           </p>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="p-6 sm:p-8 space-y-8">
-
           {/* Service Information */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full" />
-              <h2 className="text-xl font-semibold text-gray-800">Service Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Service Information
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
-                <Label className="text-gray-700 font-medium">Service Name</Label>
+                <Label className="text-gray-700 font-medium">
+                  Service Name
+                </Label>
                 <div className="py-3 px-4 rounded-lg border border-gray-200 bg-gray-50 text-gray-700">
                   {service.name || '-'}
                 </div>
               </div>
               <div>
-                <Label className="text-gray-700 font-medium">Service Slug</Label>
+                <Label className="text-gray-700 font-medium">
+                  Service Slug
+                </Label>
                 <div className="py-3 px-4 rounded-lg border border-gray-200 bg-gray-50 text-gray-700">
                   {service.slug || '-'}
                 </div>
@@ -142,7 +166,9 @@ export default function ViewGameService() {
               </div>
 
               <div>
-                <Label className="text-gray-700 font-medium">Service Type</Label>
+                <Label className="text-gray-700 font-medium">
+                  Service Type
+                </Label>
                 <div className="py-3 px-4 rounded-lg border border-gray-200 bg-gray-50 text-gray-700">
                   {getTypeText(service.type)}
                 </div>
@@ -160,7 +186,9 @@ export default function ViewGameService() {
           {/* Image Display */}
           {service.imageUrl && (
             <div className="mt-4">
-              <Label className="text-gray-700 font-medium block mb-3">Service Image</Label>
+              <Label className="text-gray-700 font-medium block mb-3">
+                Service Image
+              </Label>
               <div className="w-full max-w-3xl mx-auto aspect-video bg-white rounded-lg border shadow-sm overflow-hidden">
                 <Image
                   src={service.imageUrl}
@@ -178,24 +206,35 @@ export default function ViewGameService() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-6 bg-blue-600 rounded-full" />
-                <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Categories
+                </h2>
               </div>
 
               <div className="mt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {service.categories.map((category: { name: string; description?: string }, index: number) => (
-                    <div
-                      key={index}
-                      className="border border-gray-200 rounded-lg p-3 bg-gray-50"
-                    >
-                      <div>
-                        <span className="font-medium text-gray-900">{category.name}</span>
-                        {category.description && (
-                          <p className="text-sm text-gray-500 mt-1">{category.description}</p>
-                        )}
+                  {service.categories.map(
+                    (
+                      category: { name: string; description?: string },
+                      index: number
+                    ) => (
+                      <div
+                        key={index}
+                        className="border border-gray-200 rounded-lg p-3 bg-gray-50"
+                      >
+                        <div>
+                          <span className="font-medium text-gray-900">
+                            {category.name}
+                          </span>
+                          {category.description && (
+                            <p className="text-sm text-gray-500 mt-1">
+                              {category.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
             </div>
@@ -210,72 +249,93 @@ export default function ViewGameService() {
               </div>
 
               <div className="space-y-6">
-                {service.seo.map((seo: {
-                  language?: string;
-                  metaTitle?: string;
-                  metaDescription?: string;
-                  introduction?: string;
-                  keywords?: string[];
-                }, index: number) => (
-                  <div key={index} className="border border-gray-200 rounded-xl p-6 bg-gray-50">
-                    <div className="flex items-center gap-2 mb-4">
-                      <LanguagesIcon className="size-5 text-blue-600" />
-                      <h3 className="font-medium text-gray-700">SEO #{index + 1}</h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-gray-700 mb-1 block">Language Code</Label>
-                        <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700">
-                          {seo.language || '-'}
-                        </div>
+                {service.seo.map(
+                  (
+                    seo: {
+                      language?: string;
+                      metaTitle?: string;
+                      metaDescription?: string;
+                      introduction?: string;
+                      keywords?: string[];
+                    },
+                    index: number
+                  ) => (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-xl p-6 bg-gray-50"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <LanguagesIcon className="size-5 text-blue-600" />
+                        <h3 className="font-medium text-gray-700">
+                          SEO #{index + 1}
+                        </h3>
                       </div>
-                      <div className="md:col-span-2">
-                        <Label className="text-gray-700 mb-1 block">Meta Title</Label>
-                        <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700">
-                          {seo.metaTitle || '-'}
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Meta Description</Label>
-                      <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700 min-h-[100px]">
-                        {seo.metaDescription || '-'}
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Introduction</Label>
-                      <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                        <SunEditor
-                          setContents={seo.introduction}
-                          setOptions={{
-                            height: 'auto',
-                            buttonList: [],
-                            mode: 'balloon',
-                            resizingBar: false,
-                            charCounter: false,
-                            toolbarContainer: undefined,
-                            showPathLabel: false
-                          }}
-                          disable={true}
-                        />
-                      </div>
-                    </div>
-
-                    {Array.isArray(seo.keywords) && seo.keywords.length > 0 && (
-                      <div className="mt-6">
-                        <div className="mt-4">
-                          <Label className="text-gray-700 mb-1 block">Keywords</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-gray-700 mb-1 block">
+                            Language Code
+                          </Label>
                           <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700">
-                            {seo.keywords.join(', ')}
+                            {seo.language || '-'}
+                          </div>
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label className="text-gray-700 mb-1 block">
+                            Meta Title
+                          </Label>
+                          <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700">
+                            {seo.metaTitle || '-'}
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      <div className="mt-4">
+                        <Label className="text-gray-700 mb-1 block">
+                          Meta Description
+                        </Label>
+                        <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700 min-h-[100px]">
+                          {seo.metaDescription || '-'}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <Label className="text-gray-700 mb-1 block">
+                          Introduction
+                        </Label>
+                        <div className="border border-gray-200 rounded-lg p-4 bg-white">
+                          <SunEditor
+                            setContents={seo.introduction}
+                            setOptions={{
+                              height: 'auto',
+                              buttonList: [],
+                              mode: 'balloon',
+                              resizingBar: false,
+                              charCounter: false,
+                              toolbarContainer: undefined,
+                              showPathLabel: false,
+                            }}
+                            disable={true}
+                          />
+                        </div>
+                      </div>
+
+                      {Array.isArray(seo.keywords) &&
+                        seo.keywords.length > 0 && (
+                          <div className="mt-6">
+                            <div className="mt-4">
+                              <Label className="text-gray-700 mb-1 block">
+                                Keywords
+                              </Label>
+                              <div className="py-2 px-4 rounded-lg border border-gray-200 bg-white text-gray-700">
+                                {seo.keywords.join(', ')}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}

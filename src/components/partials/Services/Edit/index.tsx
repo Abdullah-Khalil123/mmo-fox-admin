@@ -3,8 +3,15 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Plus, Trash2, Upload, LanguagesIcon, Bot } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import {
+  ChevronLeft,
+  Plus,
+  Trash2,
+  Upload,
+  LanguagesIcon,
+  Bot,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState, useRef } from 'react';
@@ -18,22 +25,24 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import { ServiceFormData, serviceSchema } from '@/types/game.schema';
 import { ServiceStatus, ServiceType } from '@/types/game';
 import { useServiceById, useUpdateServiceById } from '@/hooks/useServices';
 
-export default function EditGameService() {
+export default function EditGameService({
+  serviceId,
+}: {
+  serviceId: string | number;
+}) {
   const router = useRouter();
-  const params = useParams();
-  const serviceId = params.serviceId as string;
   const { data: serviceData, isLoading } = useServiceById(serviceId);
   const { mutate: updateService, isPending } = useUpdateServiceById(serviceId);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -58,21 +67,37 @@ export default function EditGameService() {
       currency: 'USD',
       status: ServiceStatus.PUBLISHED,
       type: ServiceType.COACHING,
-      vendor: "", // Default vendor ID, adjust as needed
-      seo: [{ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] }],
+      vendor: '', // Default vendor ID, adjust as needed
+      seo: [
+        {
+          language: 'EN',
+          metaTitle: '',
+          metaDescription: '',
+          introduction: '',
+          keywords: [],
+        },
+      ],
       categories: [],
       imageUrl: '',
     },
   });
 
-  const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
+  const {
+    fields: seoFields,
+    append: appendSeo,
+    remove: removeSeo,
+  } = useFieldArray({
     control,
     name: 'seo',
   });
 
-  const [categoryFields, setCategoryFields] = useState<{ name: string; description: string }[]>([]);
-  const appendCategory = (category: { name: string; description: string }) => setCategoryFields(prev => [...prev, category]);
-  const removeCategory = (index: number) => setCategoryFields(prev => prev.filter((_, i) => i !== index));
+  const [categoryFields, setCategoryFields] = useState<
+    { name: string; description: string }[]
+  >([]);
+  const appendCategory = (category: { name: string; description: string }) =>
+    setCategoryFields((prev) => [...prev, category]);
+  const removeCategory = (index: number) =>
+    setCategoryFields((prev) => prev.filter((_, i) => i !== index));
 
   const imageUrl = watch('imageUrl');
   const gameName = watch('name');
@@ -81,15 +106,23 @@ export default function EditGameService() {
   useEffect(() => {
     if (serviceData?.data && !formInitialized) {
       const svc = serviceData.data;
-      console.log("Loading service data:", svc);
+      console.log('Loading service data:', svc);
       reset({
         name: svc.name || '',
         slug: svc.slug || '',
         currency: svc.currency || 'USD',
         status: svc.status || ServiceStatus.PUBLISHED,
         type: svc.type || ServiceType.COACHING,
-        vendor: svc.vendorId ,
-        seo: svc.seo || [{ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] }],
+        vendor: svc.vendorId,
+        seo: svc.seo || [
+          {
+            language: 'EN',
+            metaTitle: '',
+            metaDescription: '',
+            introduction: '',
+            keywords: [],
+          },
+        ],
         categories: svc.categories || [],
         imageUrl: svc.imageUrl || '',
       });
@@ -103,7 +136,7 @@ export default function EditGameService() {
 
       setFormInitialized(true); // Mark form as initialized
     }
-  }, [serviceData, reset]);
+  }, [serviceData, formInitialized, reset]);
 
   // Handle image previews
   useEffect(() => {
@@ -124,10 +157,15 @@ export default function EditGameService() {
     formData.append('type', data.type);
     formData.append('vendorId', data.vendor);
 
-    formData.append('seo', JSON.stringify(data.seo.map(seo => ({
-      ...seo,
-      keywords: Array.isArray(seo.keywords) ? seo.keywords : []
-    }))));
+    formData.append(
+      'seo',
+      JSON.stringify(
+        data.seo.map((seo) => ({
+          ...seo,
+          keywords: Array.isArray(seo.keywords) ? seo.keywords : [],
+        }))
+      )
+    );
 
     formData.append('categories', JSON.stringify(categoryFields));
 
@@ -150,9 +188,18 @@ export default function EditGameService() {
   };
 
   const handleAutoTranslate = (index: number) => {
-    setValue(`seo.${index}.metaTitle`, `Auto-translated SEO title for ${gameName}`);
-    setValue(`seo.${index}.metaDescription`, `Auto-translated SEO description for ${gameName}`);
-    setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${gameName}`);
+    setValue(
+      `seo.${index}.metaTitle`,
+      `Auto-translated SEO title for ${gameName}`
+    );
+    setValue(
+      `seo.${index}.metaDescription`,
+      `Auto-translated SEO description for ${gameName}`
+    );
+    setValue(
+      `seo.${index}.introduction`,
+      `Auto-translated introduction for ${gameName}`
+    );
   };
 
   const { ref: inputRef, ...imageRest } = register('imageUrl');
@@ -161,7 +208,7 @@ export default function EditGameService() {
     if (newCategory.name) {
       appendCategory({
         name: newCategory.name,
-        description: newCategory.description
+        description: newCategory.description,
       });
       setNewCategory({ name: '', description: '' });
       setCategoryModalOpen(false);
@@ -170,9 +217,9 @@ export default function EditGameService() {
 
   // Mock vendor data
   const vendors = [
-    { id: "1", name: 'Vendor A' },
-    { id: "2", name: 'Vendor B' },
-    { id: "3", name: 'Vendor C' },
+    { id: '1', name: 'Vendor A' },
+    { id: '2', name: 'Vendor B' },
+    { id: '3', name: 'Vendor C' },
   ];
 
   // Show loading until both data is loaded and form is initialized
@@ -191,30 +238,44 @@ export default function EditGameService() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 sm:mb-8">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50"
+        >
           <ChevronLeft className="size-5" />
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Edit Game Service</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+            Edit Game Service
+          </h1>
           <p className="text-gray-500 mt-1 text-sm sm:text-base">
-            Update the details below for this game service. All fields marked with <span className="text-red-500">*</span> are required.
+            Update the details below for this game service. All fields marked
+            with <span className="text-red-500">*</span> are required.
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+      >
         <div className="p-6 sm:p-8 space-y-8">
-
           {/* Service Information */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full" />
-              <h2 className="text-xl font-semibold text-gray-800">Service Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Service Information
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
-                <Label className="text-gray-700 font-medium">Service Name <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Service Name <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   {...register('name')}
                   placeholder="Enter service name"
@@ -223,7 +284,9 @@ export default function EditGameService() {
                 {errors.name && <ErrorInput>{errors.name.message}</ErrorInput>}
               </div>
               <div>
-                <Label className="text-gray-700 font-medium">Service Slug <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Service Slug <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   {...register('slug')}
                   placeholder="Enter slug"
@@ -266,7 +329,9 @@ export default function EditGameService() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               {/* Currency Dropdown */}
               <div>
-                <Label className="text-gray-700 font-medium">Currency <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Currency <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   name="currency"
                   control={control}
@@ -284,12 +349,16 @@ export default function EditGameService() {
                     </Select>
                   )}
                 />
-                {errors.currency && <ErrorInput>{errors.currency.message}</ErrorInput>}
+                {errors.currency && (
+                  <ErrorInput>{errors.currency.message}</ErrorInput>
+                )}
               </div>
 
               {/* Status Dropdown */}
               <div>
-                <Label className="text-gray-700 font-medium">Status <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Status <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   name="status"
                   control={control}
@@ -299,18 +368,26 @@ export default function EditGameService() {
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={ServiceStatus.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={ServiceStatus.UNPUBLISHED}>Unpublished</SelectItem>
+                        <SelectItem value={ServiceStatus.PUBLISHED}>
+                          Published
+                        </SelectItem>
+                        <SelectItem value={ServiceStatus.UNPUBLISHED}>
+                          Unpublished
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 />
-                {errors.status && <ErrorInput>{errors.status.message}</ErrorInput>}
+                {errors.status && (
+                  <ErrorInput>{errors.status.message}</ErrorInput>
+                )}
               </div>
 
               {/* Type Dropdown */}
               <div>
-                <Label className="text-gray-700 font-medium">Service Type <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Service Type <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   name="type"
                   control={control}
@@ -320,10 +397,18 @@ export default function EditGameService() {
                         <SelectValue placeholder="Select service type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={ServiceType.COACHING}>Coaching</SelectItem>
-                        <SelectItem value={ServiceType.BOOSTING}>Boosting</SelectItem>
-                        <SelectItem value={ServiceType.LEVELING}>Leveling</SelectItem>
-                        <SelectItem value={ServiceType.CURRENCY}>Currency</SelectItem>
+                        <SelectItem value={ServiceType.COACHING}>
+                          Coaching
+                        </SelectItem>
+                        <SelectItem value={ServiceType.BOOSTING}>
+                          Boosting
+                        </SelectItem>
+                        <SelectItem value={ServiceType.LEVELING}>
+                          Leveling
+                        </SelectItem>
+                        <SelectItem value={ServiceType.CURRENCY}>
+                          Currency
+                        </SelectItem>
                         <SelectItem value={ServiceType.OTHER}>Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -341,31 +426,33 @@ export default function EditGameService() {
                   name="vendor"
                   control={control}
                   render={({ field }) => {
-                    console.log("Vendor field value:", typeof(field.value));
-                    console.log("Available vendors:", vendors);
+                    console.log('Vendor field value:', typeof field.value);
+                    console.log('Available vendors:', vendors);
                     return (
-                      (
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <SelectValue placeholder="Select vendor">
-                              {vendors.find(v => v.id === field.value)?.name}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {vendors.map(vendor => (
-                              <SelectItem key={vendor.id} value={vendor.id}>
-                                {vendor.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )
-                    )
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                          <SelectValue placeholder="Select vendor">
+                            {vendors.find((v) => v.id === field.value)?.name}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {vendors.map((vendor) => (
+                            <SelectItem key={vendor.id} value={vendor.id}>
+                              {vendor.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    );
                   }}
                 />
-                {errors.vendor && <ErrorInput>{errors.vendor.message}</ErrorInput>}
+                {errors.vendor && (
+                  <ErrorInput>{errors.vendor.message}</ErrorInput>
+                )}
               </div>
-
             </div>
           </div>
 
@@ -405,8 +492,7 @@ export default function EditGameService() {
                     Drag & drop or click to upload
                   </p>
                   <p className="text-xs text-gray-400 mt-2">
-                    Recommended size: 1200×630 pixels • PNG, JPG, GIF up to
-                    10MB
+                    Recommended size: 1200×630 pixels • PNG, JPG, GIF up to 10MB
                   </p>
                   <Button
                     variant="outline"
@@ -418,11 +504,9 @@ export default function EditGameService() {
                 </div>
               )}
             </div>
-            {
-              errors.imageUrl && (
-                <ErrorInput>{errors.imageUrl.message}</ErrorInput>
-              )
-            }
+            {errors.imageUrl && (
+              <ErrorInput>{errors.imageUrl.message}</ErrorInput>
+            )}
           </div>
 
           {/* Categories Section */}
@@ -430,9 +514,14 @@ export default function EditGameService() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-6 bg-blue-600 rounded-full" />
-                <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Categories
+                </h2>
               </div>
-              <Dialog open={categoryModalOpen} onOpenChange={setCategoryModalOpen}>
+              <Dialog
+                open={categoryModalOpen}
+                onOpenChange={setCategoryModalOpen}
+              >
                 <DialogTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
                     <Plus className="size-4" /> Add Category
@@ -444,30 +533,45 @@ export default function EditGameService() {
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-gray-700 font-medium">Category Name <span className="text-red-500">*</span></Label>
+                      <Label className="text-gray-700 font-medium">
+                        Category Name <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         value={newCategory.name}
-                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                        onChange={(e) =>
+                          setNewCategory({
+                            ...newCategory,
+                            name: e.target.value,
+                          })
+                        }
                         placeholder="Enter category name"
                         className="py-4 px-4 rounded-lg border-gray-300"
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-700 font-medium">Description</Label>
+                      <Label className="text-gray-700 font-medium">
+                        Description
+                      </Label>
                       <textarea
                         value={newCategory.description}
-                        onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                        onChange={(e) =>
+                          setNewCategory({
+                            ...newCategory,
+                            description: e.target.value,
+                          })
+                        }
                         placeholder="Enter description"
                         className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
                       />
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setCategoryModalOpen(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setCategoryModalOpen(false)}
+                      >
                         Cancel
                       </Button>
-                      <Button onClick={handleAddCategory}>
-                        Add Category
-                      </Button>
+                      <Button onClick={handleAddCategory}>Add Category</Button>
                     </div>
                   </div>
                 </DialogContent>
@@ -483,9 +587,13 @@ export default function EditGameService() {
                       className="border border-gray-200 rounded-lg p-3 flex justify-between items-center bg-white shadow-sm"
                     >
                       <div>
-                        <span className="font-medium text-gray-900">{field.name}</span>
+                        <span className="font-medium text-gray-900">
+                          {field.name}
+                        </span>
                         {field.description && (
-                          <p className="text-xs text-gray-500 mt-1">{field.description}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {field.description}
+                          </p>
                         )}
                       </div>
                       <Button
@@ -502,7 +610,9 @@ export default function EditGameService() {
               ) : (
                 <div className="bg-gray-50 rounded-lg p-6 text-center">
                   <p className="text-gray-500">No categories added yet</p>
-                  <p className="text-sm text-gray-400 mt-1">Add categories to organize your game</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Add categories to organize your game
+                  </p>
                 </div>
               )}
             </div>
@@ -515,17 +625,35 @@ export default function EditGameService() {
                 <div className="w-2 h-6 bg-blue-600 rounded-full" />
                 <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
               </div>
-              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] })}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() =>
+                  appendSeo({
+                    language: 'EN',
+                    metaTitle: '',
+                    metaDescription: '',
+                    introduction: '',
+                    keywords: [],
+                  })
+                }
+              >
                 <Plus className="size-4" /> Add SEO Entry
               </Button>
             </div>
             <div className="space-y-6">
               {seoFields.map((field, index) => (
-                <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                <div
+                  key={field.id}
+                  className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm"
+                >
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-2">
                       <LanguagesIcon className="size-5 text-blue-600" />
-                      <h3 className="font-medium text-gray-700">SEO #{index + 1}</h3>
+                      <h3 className="font-medium text-gray-700">
+                        SEO #{index + 1}
+                      </h3>
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -538,7 +666,12 @@ export default function EditGameService() {
                         Auto Translate
                       </Button>
                       {seoFields.length > 1 && (
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeSeo(index)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:bg-red-50"
+                          onClick={() => removeSeo(index)}
+                        >
                           <Trash2 className="size-4" />
                         </Button>
                       )}
@@ -547,7 +680,9 @@ export default function EditGameService() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                      <Label className="text-gray-700 mb-1 block">
+                        Language Code
+                      </Label>
                       <Input
                         {...register(`seo.${index}.language` as const)}
                         placeholder="EN"
@@ -555,7 +690,9 @@ export default function EditGameService() {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                      <Label className="text-gray-700 mb-1 block">
+                        Meta Title
+                      </Label>
                       <Input
                         {...register(`seo.${index}.metaTitle` as const)}
                         placeholder="Meta title"
@@ -565,19 +702,26 @@ export default function EditGameService() {
                   </div>
 
                   <div className="mt-4">
-                    <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                    <Label className="text-gray-700 mb-1 block">
+                      Meta Description
+                    </Label>
                     <textarea
                       {...register(`seo.${index}.metaDescription` as const)}
                       placeholder="Meta description"
                       className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
                     />
                     {errors.seo?.[index]?.metaDescription && (
-                      <ErrorInput>{errors.seo[index].metaDescription?.message as string}</ErrorInput>
+                      <ErrorInput>
+                        {errors.seo[index].metaDescription?.message as string}
+                      </ErrorInput>
                     )}
                   </div>
 
                   <div className="mt-4">
-                    <Label className="text-gray-700 mb-1 block"> Introduction</Label>
+                    <Label className="text-gray-700 mb-1 block">
+                      {' '}
+                      Introduction
+                    </Label>
                     <Controller
                       control={control}
                       name={`seo.${index}.introduction` as const}
@@ -602,14 +746,20 @@ export default function EditGameService() {
                       )}
                     />
                     {errors.seo?.[index]?.introduction && (
-                      <ErrorInput>{errors.seo[index].introduction?.message as string}</ErrorInput>
+                      <ErrorInput>
+                        {errors.seo[index].introduction?.message as string}
+                      </ErrorInput>
                     )}
                   </div>
 
                   <div className="mt-6">
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Keywords</Label>
-                      <p className="text-sm text-gray-500 mb-2">Comma-separated list of keywords</p>
+                      <Label className="text-gray-700 mb-1 block">
+                        Keywords
+                      </Label>
+                      <p className="text-sm text-gray-500 mb-2">
+                        Comma-separated list of keywords
+                      </p>
                       <Input
                         {...register(`seo.${index}.keywords` as const)}
                         placeholder="keyword1, keyword2, keyword3"
@@ -624,7 +774,11 @@ export default function EditGameService() {
 
           {/* Actions */}
           <div className="flex gap-4 pt-8 border-t border-gray-200 flex-col sm:flex-row">
-            <Button variant="outline" className="py-5 sm:py-6 text-base rounded-xl border-gray-300 hover:bg-gray-50 flex-1" onClick={() => router.push('/games')}>
+            <Button
+              variant="outline"
+              className="py-5 sm:py-6 text-base rounded-xl border-gray-300 hover:bg-gray-50 flex-1"
+              onClick={() => router.push('/games')}
+            >
               Cancel
             </Button>
             <Button
@@ -634,13 +788,31 @@ export default function EditGameService() {
             >
               {isPending ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Updating...
                 </span>
-              ) : 'Update Service'}
+              ) : (
+                'Update Service'
+              )}
             </Button>
           </div>
         </div>
