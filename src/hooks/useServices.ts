@@ -4,6 +4,7 @@ import {
   deleteServiceById,
   updateServiceById,
   getServiceById,
+  createServiceConfigCurrencyByServiceId,
 } from '@/actions/Services/actions';
 import queryClient from '@/lib/queryClient';
 // import { ServiceFormData } from '@/types/game.schema';
@@ -35,6 +36,7 @@ export const useCreateServiceByGameId = (gameId: string | number) => {
   });
 };
 
+
 export const useDeleteServiceById = (gameId: string | number) => {
   return useMutation({
     mutationFn: (serviceId: string | number) => deleteServiceById(serviceId),
@@ -53,6 +55,21 @@ export const useUpdateServiceById = (serviceId: string | number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['service', serviceId],
+      });
+    },
+  });
+};
+
+
+//service config
+
+export const useCreateServiceConfigCurrencyByServiceId = (serviceId: string | number) => {
+  return useMutation({
+    mutationFn: (serviceData: FormData) =>
+      createServiceConfigCurrencyByServiceId(serviceId, serviceData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['services-by-game', serviceId],
       });
     },
   });

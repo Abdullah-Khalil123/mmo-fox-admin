@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const getServiceById = async (serviceId: string | number) => {
   try {
-    const response = await axiosInstance.get(`/service/translate/${serviceId}`,{
+    const response = await axiosInstance.get(`/service/translate/${serviceId}`, {
       headers: {
         'Accept-Language': 'EN', // Change 'en' to desired language if needed
       },
@@ -23,7 +23,7 @@ const getServicesByGameId = async (gameId: number | string) => {
   try {
     const response = await axiosInstance.get(`/service/game/${gameId}`, {
       headers: {
-      'Accept-Language': 'EN', // Change 'en' to desired language if needed
+        'Accept-Language': 'EN', // Change 'en' to desired language if needed
       },
     });
     console.log(`Fetching services for game ID ${gameId}`, response.data);
@@ -101,10 +101,36 @@ const updateServiceById = async (
   }
 };
 
+//service config
+const createServiceConfigCurrencyByServiceId = async (
+  serviceId: string | number,
+  serviceData: FormData
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/service/currency/${serviceId}/config`,
+      serviceData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to create service by game ID'
+      );
+    }
+  }
+};
+
 export {
   getServicesByGameId,
   createServiceByGameId,
   deleteServiceById,
   updateServiceById,
   getServiceById,
+  createServiceConfigCurrencyByServiceId,
 };

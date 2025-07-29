@@ -77,6 +77,14 @@ const ServicesTable = ({
                   <Button
                     variant={'outline'}
                     onClick={() => {
+                      router.push(`services/config/${service.id}`);
+                    }}
+                  >
+                    Config
+                  </Button>
+                  <Button
+                    variant={'outline'}
+                    onClick={() => {
                       router.push(`services/view/${service.id}`);
                     }}
                   >

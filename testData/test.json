@@ -1,0 +1,276 @@
+[
+      {
+            "amount": 500,
+            "unit": "Gems",
+            "server": [
+                  {
+                        "country": "USA",
+                        "region": [
+                              {
+                                    "name": "California",
+                                    "subregion": [
+                                          {
+                                                "name": "Los Angeles",
+                                                "price": [
+                                                      {
+                                                            "price": 10,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "San Francisco",
+                                                "price": [
+                                                      {
+                                                            "price": 12,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "San Francisco",
+                                                "price": [
+                                                      {
+                                                            "price": 12,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "San Diego",
+                                                "price": [
+                                                      {
+                                                            "price": 11,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              },
+                              {
+                                    "name": "Texas",
+                                    "subregion": [
+                                          {
+                                                "name": "Houston",
+                                                "price": [
+                                                      {
+                                                            "price": 9,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "Dallas",
+                                                "price": [
+                                                      {
+                                                            "price": 10,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              }
+                        ]
+                  },
+                  {
+                        "country": "Canada",
+                        "region": [
+                              {
+                                    "name": "Ontario",
+                                    "subregion": [
+                                          {
+                                                "name": "Toronto",
+                                                "price": [
+                                                      {
+                                                            "price": 11,
+                                                            "currency": "CAD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "Ottawa",
+                                                "price": [
+                                                      {
+                                                            "price": 12,
+                                                            "currency": "CAD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              }
+                        ]
+                  },
+                  {
+                        "country": "Canada",
+                        "region": [
+                              {
+                                    "name": "Ontario",
+                                    "subregion": [
+                                          {
+                                                "name": "Toronto",
+                                                "price": [
+                                                      {
+                                                            "price": 11,
+                                                            "currency": "CAD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "Ottawa",
+                                                "price": [
+                                                      {
+                                                            "price": 12,
+                                                            "currency": "CAD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              }
+                        ]
+                  }
+            ]
+      },
+      {
+            "amount": 2000,
+            "unit": "Gems",
+            "server": [
+                  {
+                        "country": "USA",
+                        "region": [
+                              {
+                                    "name": "California",
+                                    "subregion": [
+                                          {
+                                                "name": "Los Angeles",
+                                                "price": [
+                                                      {
+                                                            "price": 100,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "San Francisco",
+                                                "price": [
+                                                      {
+                                                            "price": 120,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "San Francisco",
+                                                "price": [
+                                                      {
+                                                            "price": 120,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "San Diego",
+                                                "price": [
+                                                      {
+                                                            "price": 110,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              },
+                              {
+                                    "name": "Texas",
+                                    "subregion": [
+                                          {
+                                                "name": "Houston",
+                                                "price": [
+                                                      {
+                                                            "price": 90,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "Dallas",
+                                                "price": [
+                                                      {
+                                                            "price": 100,
+                                                            "currency": "USD"
+                                                      },
+                                                      {
+                                                            "price": 95,
+                                                            "currency": "AUD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              }
+                        ]
+                  },
+                  {
+                        "country": "Canada",
+                        "region": [
+                              {
+                                    "name": "Ontario",
+                                    "subregion": [
+                                          {
+                                                "name": "Toronto",
+                                                "price": [
+                                                      {
+                                                            "price": 110,
+                                                            "currency": "CAD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "Ottawa",
+                                                "price": [
+                                                      {
+                                                            "price": 120,
+                                                            "currency": "CAD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              }
+                        ]
+                  },
+                  {
+                        "country": "Canada",
+                        "region": [
+                              {
+                                    "name": "Ontario",
+                                    "subregion": [
+                                          {
+                                                "name": "Toronto",
+                                                "price": [
+                                                      {
+                                                            "price": 111,
+                                                            "currency": "CAD"
+                                                      },
+                                                      {
+                                                            "price": 105,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          },
+                                          {
+                                                "name": "Ottawa",
+                                                "price": [
+                                                      {
+                                                            "price": 120,
+                                                            "currency": "CAD"
+                                                      },
+                                                      {
+                                                            "price": 105,
+                                                            "currency": "USD"
+                                                      }
+                                                ]
+                                          }
+                                    ]
+                              }
+                        ]
+                  }
+            ]
+      }
+]
