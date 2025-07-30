@@ -12,19 +12,14 @@ const Pagination = ({
   pagination: {
     currentPage: number;
     totalPages: number;
-    totalGames: number;
+    totalItems: number;
     limit: number;
   };
 }) => {
-  const {
-    currentPage = 1,
-    totalPages = 1,
-    totalGames = 10,
-    limit = 10,
-  } = pagination;
+  const { currentPage, totalPages, totalItems, limit } = pagination;
 
   const start = (currentPage - 1) * limit + 1;
-  const end = Math.min(currentPage * limit, totalGames);
+  const end = Math.min(currentPage * limit, totalItems);
 
   const generatePageNumbers = () => {
     const pages: (number | string)[] = [];
@@ -64,7 +59,7 @@ const Pagination = ({
           <p className="text-sm text-muted-foreground">
             Showing <span className="font-medium">{start}</span> to{' '}
             <span className="font-medium">{end}</span> of{' '}
-            <span className="font-medium">{totalGames}</span> results
+            <span className="font-medium">{totalItems}</span> results
           </p>
         </div>
 

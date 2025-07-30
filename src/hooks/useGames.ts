@@ -48,7 +48,7 @@ export const useUpdateGame = (gameId: string | number) => {
     mutationFn: (gameData: GameFormData) => updateGame(gameId, gameData),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['game', gameId],
+        queryKey: ['gameAllData', gameId],
       });
     },
   });

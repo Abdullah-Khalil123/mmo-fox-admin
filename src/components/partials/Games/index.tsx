@@ -14,21 +14,21 @@ const GameHomePage = () => {
   const games = data?.data || [];
   const pagination = data?.pagination || {};
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
   if (isError) {
     return <div>Error loading games</div>;
   }
 
   return (
     <div className="w-full space-y-4">
-      {/* Header with Title and Search */}
-      <SearchHeader />
+      <SearchHeader
+        title="Games"
+        discription="Manage your game library and track status"
+        link="/games/new"
+      />
 
       {/* Table */}
       <div className="rounded-md border">
-        <GameTable games={games} />
+        {isLoading ? <div>Loading...</div> : <GameTable games={games} />}
       </div>
       <Pagination
         setLimit={setLimit}

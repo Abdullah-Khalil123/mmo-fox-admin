@@ -1,6 +1,6 @@
 import { Order } from './order';
 import { Review } from './review';
-import { User } from './user';
+import { User } from './user.schema';
 
 export interface Game {
   translations: boolean;

@@ -1,6 +1,6 @@
 import { Service } from './game';
 import { Order } from './order';
-import { User } from './user';
+import { User } from './user.schema';
 
 export interface Review {
   id: number;
