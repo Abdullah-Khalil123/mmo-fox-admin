@@ -3,15 +3,30 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { User, Gamepad2, DollarSign, Menu, LogOut, LayoutDashboard, ChevronRight } from 'lucide-react';
+import {
+  User,
+  Gamepad2,
+  DollarSign,
+  Menu,
+  LogOut,
+  Newspaper,
+  LayoutDashboard,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 
 const links = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    exact: true,
+  },
   { href: '/games', label: 'Games', icon: Gamepad2 },
   { href: '/users', label: 'Users', icon: User },
+  { href: '/news', label: 'News', icon: Newspaper },
   { href: '/orders', label: 'Orders', icon: DollarSign },
 ];
 
@@ -61,10 +76,12 @@ export default function SideNav() {
       >
         <div className="flex flex-col h-full">
           {/* Header with subtle scroll effect */}
-          <div className={cn(
-            "p-5 pt-7 border-b border-gray-200 dark:border-gray-800 transition-all duration-300",
-            isScrolling ? "py-4" : "pb-6"
-          )}>
+          <div
+            className={cn(
+              'p-5 pt-7 border-b border-gray-200 dark:border-gray-800 transition-all duration-300',
+              isScrolling ? 'py-4' : 'pb-6'
+            )}
+          >
             <div className="flex items-center gap-3">
               <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-2 rounded-lg shadow">
                 <LayoutDashboard className="w-6 h-6 text-white" />
@@ -98,23 +115,33 @@ export default function SideNav() {
                     )}
                     onClick={() => setIsOpen(false)}
                   >
-                    <div className={cn(
-                      "p-2 rounded-lg transition-all",
-                      isActive
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200/60 dark:bg-gray-700 text-gray-700 dark:text-gray-300 group-hover:bg-blue-500 group-hover:text-white"
-                    )}>
+                    <div
+                      className={cn(
+                        'p-2 rounded-lg transition-all',
+                        isActive
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-200/60 dark:bg-gray-700 text-gray-700 dark:text-gray-300 group-hover:bg-blue-500 group-hover:text-white'
+                      )}
+                    >
                       <Icon className="w-4 h-4" />
                     </div>
-                    <span className={cn(
-                      isActive ? "text-blue-700 dark:text-blue-300 font-medium" : "font-normal"
-                    )}>
+                    <span
+                      className={cn(
+                        isActive
+                          ? 'text-blue-700 dark:text-blue-300 font-medium'
+                          : 'font-normal'
+                      )}
+                    >
                       {label}
                     </span>
-                    <ChevronRight className={cn(
-                      "ml-auto w-4 h-4 transition-transform duration-200",
-                      isActive ? "text-blue-500 transform translate-x-0" : "text-gray-400 transform -translate-x-1 group-hover:translate-x-0 group-hover:text-blue-500"
-                    )} />
+                    <ChevronRight
+                      className={cn(
+                        'ml-auto w-4 h-4 transition-transform duration-200',
+                        isActive
+                          ? 'text-blue-500 transform translate-x-0'
+                          : 'text-gray-400 transform -translate-x-1 group-hover:translate-x-0 group-hover:text-blue-500'
+                      )}
+                    />
                   </Link>
                 );
               })}
@@ -126,8 +153,12 @@ export default function SideNav() {
             <div className="flex items-center gap-3 mb-4 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
               <div className="bg-gray-300 border-2 border-dashed rounded-xl w-10 h-10" />
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Admin User</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">admin@example.com</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Admin User
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  admin@example.com
+                </p>
               </div>
             </div>
 

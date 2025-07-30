@@ -10,26 +10,52 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChevronLeft, Eye, EyeOff } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { userSchema, User, UserRole } from '@/types/user.schema';
+import { useCreateUser } from '@/hooks/useUsers';
 
 export default function AddNewUser() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const { mutate, isPending } = useCreateUser();
+  const {
+    watch,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      role: UserRole.CUSTOMER, // Default role
+      balance: 0, // Default balance
+    },
+  });
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Form submission logic go here
-    console.log('Form submitted');
+  const onSubmit = (user: User) => {
+    mutate(user, {
+      onSuccess: () => {
+        router.push('/users');
+      },
+      onError: (error) => {
+        console.error('Error creating user:', error);
+      },
+    });
   };
 
   const handleCancel = () => {
     router.back();
   };
+  console.log(errors);
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
@@ -54,7 +80,7 @@ export default function AddNewUser() {
       </div>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
       >
         <div className="p-6 sm:p-8 space-y-8">
@@ -72,21 +98,33 @@ export default function AddNewUser() {
                   Full Name <span className="text-red-500">*</span>
                 </Label>
                 <Input
+                  {...register('name')}
                   name="name"
                   placeholder="Enter full name"
                   className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
               <div>
                 <Label className="text-gray-700 font-medium">
                   Email Address <span className="text-red-500">*</span>
                 </Label>
                 <Input
+                  {...register('email')}
                   name="email"
                   type="email"
                   placeholder="Enter email address"
                   className="py-4 px-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -94,7 +132,7 @@ export default function AddNewUser() {
           {/* Account Security */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-6 bg-green-600 rounded-full" />
+              <div className="w-2 h-6 bg-blue-600 rounded-full" />
               <h2 className="text-xl font-semibold text-gray-800">
                 Account Security
               </h2>
@@ -106,11 +144,13 @@ export default function AddNewUser() {
                 </Label>
                 <div className="relative">
                   <Input
+                    {...register('password')}
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter password"
                     className="py-4 px-4 pr-12 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+
                   <Button
                     type="button"
                     variant="ghost"
@@ -125,21 +165,38 @@ export default function AddNewUser() {
                     )}
                   </Button>
                 </div>
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
               <div>
                 <Label className="text-gray-700 font-medium">
                   User Role <span className="text-red-500">*</span>
                 </Label>
-                <Select>
+                <Select
+                  {...register('role')}
+                  defaultValue={watch('role')}
+                  name="role"
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="editor">Editor</SelectItem>
+                    {Object.values(UserRole).map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role.charAt(0).toUpperCase() +
+                          role.slice(1).toLowerCase()}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {errors.role && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.role.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -147,7 +204,7 @@ export default function AddNewUser() {
           {/* User Status */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-6 bg-indigo-600 rounded-full" />
+              <div className="w-2 h-6 bg-blue-600 rounded-full" />
               <h2 className="text-xl font-semibold text-gray-800">
                 Account Status
               </h2>
@@ -211,6 +268,7 @@ export default function AddNewUser() {
               Cancel
             </Button>
             <Button
+              disabled={isPending}
               type="submit"
               className="py-5 sm:py-6 text-base rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md flex-1"
             >

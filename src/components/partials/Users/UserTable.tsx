@@ -8,6 +8,7 @@ import {
   Table,
 } from '@/components/ui/table';
 import { User } from '@/types/user.schema';
+import Link from 'next/link';
 import React from 'react';
 
 const UserTable = ({ users }: { users: User[] }) => {
@@ -33,7 +34,9 @@ const UserTable = ({ users }: { users: User[] }) => {
               <TableCell>
                 <div className="flex justify-end space-x-2">
                   <Button variant={'link'}>View</Button>
-                  <Button>Edit</Button>
+                  <Link href={`/users/${user.id}/edit`}>
+                    <Button>Edit</Button>
+                  </Link>
                   <Button variant={'destructive'}>Delete</Button>
                 </div>
               </TableCell>

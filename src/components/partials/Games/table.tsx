@@ -18,11 +18,13 @@ const GameTable = ({ games }: { games: Game[] }) => {
   const router = useRouter();
   // const {data, isError, isLoading} = deleteGame()
 
-
   const handleDeleteGame = async (id: string | number) => {
     try {
       const response = await deleteGame(id);
-      const { status, data } = response as { status: number; data?: { message?: string } };
+      const { status, data } = response as {
+        status: number;
+        data?: { message?: string };
+      };
       if (status !== 200) {
         throw new Error(data?.message || 'Failed to delete game');
       }
@@ -35,7 +37,7 @@ const GameTable = ({ games }: { games: Game[] }) => {
       // Optionally, handle error (e.g., show error message)
       console.error('Error deleting game:', error);
     }
-  }
+  };
 
   return (
     <div>
