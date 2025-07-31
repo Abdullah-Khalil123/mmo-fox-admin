@@ -505,7 +505,7 @@ export default function EditGameService({
               )}
             </div>
             {errors.imageUrl && (
-              <ErrorInput>{errors.imageUrl.message}</ErrorInput>
+              <ErrorInput>{errors.imageUrl.message as string}</ErrorInput>
             )}
           </div>
 

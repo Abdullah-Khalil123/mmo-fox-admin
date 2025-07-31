@@ -121,6 +121,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
       return () => URL.revokeObjectURL(url);
     }
   }, [imageUrl]);
+  console.log(errors);
 
   const onSubmit = (data: GameFormData) => {
     if (isPending) return;
@@ -371,7 +372,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                   )}
                 </div>
                 {errors.imageUrl && (
-                  <ErrorInput>{errors.imageUrl.message}</ErrorInput>
+                  <ErrorInput>{errors.imageUrl.message as string}</ErrorInput>
                 )}
               </div>
             </div>

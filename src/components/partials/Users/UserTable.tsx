@@ -1,3 +1,4 @@
+import ConfirmDeleteDialog from '@/components/layouts/Dialog';
 import { Button } from '@/components/ui/button';
 import {
   TableHeader,
@@ -7,11 +8,28 @@ import {
   TableCell,
   Table,
 } from '@/components/ui/table';
+import { useDeleteUser } from '@/hooks/useUsers';
 import { User } from '@/types/user.schema';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 
 const UserTable = ({ users }: { users: User[] }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const { mutate } = useDeleteUser();
+  const handleDelete = () => {
+    if (selectedId === null) return;
+    mutate(selectedId, {
+      onSuccess: () => {
+        setOpenDialog(false);
+        setSelectedId(null);
+      },
+      onError: (error) => {
+        console.error('Error deleting user:', error);
+      },
+    });
+  };
   return (
     <div>
       <Table>
@@ -37,13 +55,28 @@ const UserTable = ({ users }: { users: User[] }) => {
                   <Link href={`/users/${user.id}/edit`}>
                     <Button>Edit</Button>
                   </Link>
-                  <Button variant={'destructive'}>Delete</Button>
+                  <Button
+                    variant={'destructive'}
+                    onClick={() => {
+                      setSelectedId(user.id as number);
+                      setOpenDialog(true);
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <ConfirmDeleteDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        onConfirm={handleDelete}
+        title="Delete User"
+        description="Are you sure you want to delete this user? This action cannot be undone."
+      />
     </div>
   );
 };

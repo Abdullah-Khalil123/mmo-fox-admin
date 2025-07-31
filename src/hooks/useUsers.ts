@@ -1,5 +1,6 @@
 import {
   createUser,
+  deleteUser,
   getUser,
   getUsers,
   updateUser,
@@ -36,6 +37,15 @@ export const useEditUser = (id: string | number) => {
     mutationFn: (user: User) => updateUser(user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', id] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};
+
+export const useDeleteUser = () => {
+  return useMutation({
+    mutationFn: (id: number | string) => deleteUser(id),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });

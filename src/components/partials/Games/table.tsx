@@ -9,34 +9,32 @@ import {
   Table,
 } from '@/components/ui/table';
 import { Game } from '@/types/game';
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { deleteGame } from '@/actions/Games/actions';
 import toast from 'react-hot-toast';
+import ConfirmDeleteDialog from '@/components/layouts/Dialog';
+import { useDeleteGame } from '@/hooks/useGames';
 
 const GameTable = ({ games }: { games: Game[] }) => {
   const router = useRouter();
-  // const {data, isError, isLoading} = deleteGame()
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | number | null>(null);
 
-  const handleDeleteGame = async (id: string | number) => {
-    try {
-      const response = await deleteGame(id);
-      const { status, data } = response as {
-        status: number;
-        data?: { message?: string };
-      };
-      if (status !== 200) {
-        throw new Error(data?.message || 'Failed to delete game');
-      }
-      if (status === 200) {
-        // Optionally, show success message or refresh the page
-        toast.success(data?.message || 'Game deleted successfully');
-        window.location.reload(); // Refresh the page to reflect changes
-      }
-    } catch (error) {
-      // Optionally, handle error (e.g., show error message)
-      console.error('Error deleting game:', error);
-    }
+  const { mutate, isPending } = useDeleteGame();
+  const handleDeleteGame = async () => {
+    if (selectedId === null) return;
+    mutate(selectedId, {
+      onSuccess: () => {
+        setOpenDialog(false);
+        setSelectedId(null);
+        toast.success('Game deleted successfully');
+      },
+      onError: (error) => {
+        setOpenDialog(false);
+        console.error('Error deleting game:', error);
+        toast.error('Failed to delete game');
+      },
+    });
   };
 
   return (
@@ -113,9 +111,8 @@ const GameTable = ({ games }: { games: Game[] }) => {
                     variant="destructive"
                     size="sm"
                     onClick={() => {
-                      if (game.id !== undefined) {
-                        handleDeleteGame(game.id);
-                      }
+                      setOpenDialog(true);
+                      setSelectedId(game.id as string | number);
                     }}
                   >
                     Delete
@@ -126,6 +123,14 @@ const GameTable = ({ games }: { games: Game[] }) => {
           ))}
         </TableBody>
       </Table>
+      <ConfirmDeleteDialog
+        onConfirm={handleDeleteGame}
+        onOpenChange={setOpenDialog}
+        open={openDialog}
+        isPending={isPending}
+        description="Are you sure you want to delete this game?"
+        title="Delete game?"
+      />
     </div>
   );
 };

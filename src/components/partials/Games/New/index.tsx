@@ -4,14 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateGame } from '@/hooks/useGames';
-import { ChevronLeft, Plus, Trash2, Upload, LanguagesIcon, Bot } from 'lucide-react';
+import {
+  ChevronLeft,
+  Plus,
+  Trash2,
+  Upload,
+  LanguagesIcon,
+  Bot,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState, useRef } from 'react';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import ErrorInput from '@/components/error';
-import Image from 'next/image'; 
+import Image from 'next/image';
 import SunEditor from 'suneditor-react';
 import 'suneditor/dist/css/suneditor.min.css';
 
@@ -33,11 +40,23 @@ export default function AddNewGames() {
     defaultValues: {
       name: '', // Added name field at top level
       slug: '',
-      seo: [{ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] }],
+      seo: [
+        {
+          language: 'EN',
+          metaTitle: '',
+          metaDescription: '',
+          introduction: '',
+          keywords: [],
+        },
+      ],
     },
   });
 
-  const { fields: seoFields, append: appendSeo, remove: removeSeo } = useFieldArray({
+  const {
+    fields: seoFields,
+    append: appendSeo,
+    remove: removeSeo,
+  } = useFieldArray({
     control,
     name: 'seo',
   });
@@ -55,7 +74,6 @@ export default function AddNewGames() {
   }, [imageUrl]);
 
   const onSubmit = (data: GameFormData) => {
-
     interface ProcessedSeoItem {
       language: string;
       metaTitle: string;
@@ -75,25 +93,27 @@ export default function AddNewGames() {
       name: data.name,
       slug: data.slug,
       imageUrl: typeof data.imageUrl === 'string' ? undefined : data.imageUrl,
-      seo: data.seo.map((seoItem: {
-        language: string;
-        metaTitle: string;
-        metaDescription: string;
-        introduction: string;
-        keywords?: string | string[];
-      }): ProcessedSeoItem => ({
-        ...seoItem,
-        keywords: typeof seoItem.keywords === 'string'
-          ? seoItem.keywords.split(',').map((k: string) => k.trim())
-          : Array.isArray(seoItem.keywords) ? seoItem.keywords : []
-      }))
+      seo: data.seo.map(
+        (seoItem: {
+          language: string;
+          metaTitle: string;
+          metaDescription: string;
+          introduction: string;
+          keywords?: string | string[];
+        }): ProcessedSeoItem => ({
+          ...seoItem,
+          keywords:
+            typeof seoItem.keywords === 'string'
+              ? seoItem.keywords.split(',').map((k: string) => k.trim())
+              : Array.isArray(seoItem.keywords)
+              ? seoItem.keywords
+              : [],
+        })
+      ),
     };
 
     const formData = new FormData();
 
-    console.log("Processed data:", processedData);
-    console.log('Submitting data:', data, data?.imageUrl);
-    console.log(typeof data.imageUrl);
     formData.append('name', processedData.name);
     formData.append('slug', processedData.slug);
     formData.append('seo', JSON.stringify(processedData.seo));
@@ -124,16 +144,22 @@ export default function AddNewGames() {
   //   }
   // };
 
-
-
   // Auto-translation functions (mock implementation)
   const handleAutoTranslate = (index: number) => {
     // In a real implementation, this would call an API
 
-    setValue(`seo.${index}.metaTitle`, `Auto-translated SEO title for ${watch('name')}`);
-    setValue(`seo.${index}.metaDescription`, `Auto-translated SEO description for ${watch('name')}`);
-    setValue(`seo.${index}.introduction`, `Auto-translated introduction for ${watch('name' as const)}`);
-
+    setValue(
+      `seo.${index}.metaTitle`,
+      `Auto-translated SEO title for ${watch('name')}`
+    );
+    setValue(
+      `seo.${index}.metaDescription`,
+      `Auto-translated SEO description for ${watch('name')}`
+    );
+    setValue(
+      `seo.${index}.introduction`,
+      `Auto-translated introduction for ${watch('name' as const)}`
+    );
   };
 
   // extract ref for file input
@@ -143,27 +169,42 @@ export default function AddNewGames() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 sm:mb-8">
-        <Button variant="ghost" size="icon" onClick={() => router.push('/games')} className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push('/games')}
+          className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50"
+        >
           <ChevronLeft className="size-5" />
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Create New Game</h1>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">Fill in the details to add a new game to your platform</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+            Create New Game
+          </h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">
+            Fill in the details to add a new game to your platform
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+      >
         <div className="p-6 sm:p-8 space-y-8">
-
           {/* Game Name */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-blue-600 rounded-full" />
-              <h2 className="text-xl font-semibold text-gray-800">Game Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Game Information
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
-                <Label className="text-gray-700 font-medium">Game Name <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Game Name <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   {...register('name')}
                   placeholder="Enter game name"
@@ -172,7 +213,9 @@ export default function AddNewGames() {
                 {errors.name && <ErrorInput>{errors.name.message}</ErrorInput>}
               </div>
               <div>
-                <Label className="text-gray-700 font-medium">Game Slug <span className="text-red-500">*</span></Label>
+                <Label className="text-gray-700 font-medium">
+                  Game Slug <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   {...register('slug')}
                   placeholder="Enter slug"
@@ -220,8 +263,7 @@ export default function AddNewGames() {
                     Drag & drop or click to upload
                   </p>
                   <p className="text-xs text-gray-400 mt-2">
-                    Recommended size: 1200×630 pixels • PNG, JPG, GIF up to
-                    10MB
+                    Recommended size: 1200×630 pixels • PNG, JPG, GIF up to 10MB
                   </p>
                   <Button
                     variant="outline"
@@ -242,17 +284,35 @@ export default function AddNewGames() {
                 <div className="w-2 h-6 bg-blue-600 rounded-full" />
                 <h2 className="text-xl font-semibold text-gray-800">SEO</h2>
               </div>
-              <Button type="button" variant="outline" className="flex items-center gap-2" onClick={() => appendSeo({ language: 'EN', metaTitle: '', metaDescription: '', introduction: '', keywords: [] })}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() =>
+                  appendSeo({
+                    language: 'EN',
+                    metaTitle: '',
+                    metaDescription: '',
+                    introduction: '',
+                    keywords: [],
+                  })
+                }
+              >
                 <Plus className="size-4" /> Add SEO Entry
               </Button>
             </div>
             <div className="space-y-6">
               {seoFields.map((field, index) => (
-                <div key={field.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                <div
+                  key={field.id}
+                  className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm"
+                >
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-2">
                       <LanguagesIcon className="size-5 text-blue-600" />
-                      <h3 className="font-medium text-gray-700">SEO #{index + 1}</h3>
+                      <h3 className="font-medium text-gray-700">
+                        SEO #{index + 1}
+                      </h3>
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -265,7 +325,12 @@ export default function AddNewGames() {
                         Auto Translate
                       </Button>
                       {seoFields.length > 1 && (
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => removeSeo(index)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:bg-red-50"
+                          onClick={() => removeSeo(index)}
+                        >
                           <Trash2 className="size-4" />
                         </Button>
                       )}
@@ -274,7 +339,9 @@ export default function AddNewGames() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label className="text-gray-700 mb-1 block">Language Code</Label>
+                      <Label className="text-gray-700 mb-1 block">
+                        Language Code
+                      </Label>
                       <Input
                         {...register(`seo.${index}.language` as const)}
                         placeholder="EN"
@@ -282,7 +349,9 @@ export default function AddNewGames() {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <Label className="text-gray-700 mb-1 block">Meta Title</Label>
+                      <Label className="text-gray-700 mb-1 block">
+                        Meta Title
+                      </Label>
                       <Input
                         {...register(`seo.${index}.metaTitle` as const)}
                         placeholder="Meta title"
@@ -292,20 +361,26 @@ export default function AddNewGames() {
                   </div>
 
                   <div className="mt-4">
-                    <Label className="text-gray-700 mb-1 block">Meta Description</Label>
+                    <Label className="text-gray-700 mb-1 block">
+                      Meta Description
+                    </Label>
                     <textarea
                       {...register(`seo.${index}.metaDescription` as const)}
                       placeholder="Meta description"
                       className="w-full py-3 px-4 rounded-lg border border-gray-300 min-h-[100px]"
                     />
                     {errors.seo?.[index]?.metaDescription && (
-                      <ErrorInput>{errors.seo[index].metaDescription?.message as string}</ErrorInput>
+                      <ErrorInput>
+                        {errors.seo[index].metaDescription?.message as string}
+                      </ErrorInput>
                     )}
                   </div>
 
                   {/* New Introduction Field */}
                   <div className="mt-4">
-                    <Label className="text-gray-700 mb-1 block">Game Introduction</Label>
+                    <Label className="text-gray-700 mb-1 block">
+                      Game Introduction
+                    </Label>
                     <Controller
                       control={control}
                       name={`seo.${index}.introduction` as const}
@@ -330,15 +405,21 @@ export default function AddNewGames() {
                       )}
                     />
                     {errors.seo?.[index]?.introduction && (
-                      <ErrorInput>{errors.seo[index].introduction?.message as string}</ErrorInput>
+                      <ErrorInput>
+                        {errors.seo[index].introduction?.message as string}
+                      </ErrorInput>
                     )}
                   </div>
 
                   {/* Keywords/Tags Section */}
                   <div className="mt-6">
                     <div className="mt-4">
-                      <Label className="text-gray-700 mb-1 block">Keywords</Label>
-                      <p className="text-sm text-gray-500 mb-2">Comma-separated list of keywords</p>
+                      <Label className="text-gray-700 mb-1 block">
+                        Keywords
+                      </Label>
+                      <p className="text-sm text-gray-500 mb-2">
+                        Comma-separated list of keywords
+                      </p>
                       <Input
                         {...register(`seo.${index}.keywords` as const)}
                         placeholder="keyword1, keyword2, keyword3"
@@ -353,7 +434,11 @@ export default function AddNewGames() {
 
           {/* Actions */}
           <div className="flex gap-4 pt-8 border-t border-gray-200 flex-col sm:flex-row">
-            <Button variant="outline" className="py-5 sm:py-6 text-base rounded-xl border-gray-300 hover:bg-gray-50 flex-1" onClick={() => router.push('/games')}>
+            <Button
+              variant="outline"
+              className="py-5 sm:py-6 text-base rounded-xl border-gray-300 hover:bg-gray-50 flex-1"
+              onClick={() => router.push('/games')}
+            >
               Cancel
             </Button>
             <Button
@@ -363,13 +448,31 @@ export default function AddNewGames() {
             >
               {isPending ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Creating...
                 </span>
-              ) : 'Create Game'}
+              ) : (
+                'Create Game'
+              )}
             </Button>
           </div>
         </div>

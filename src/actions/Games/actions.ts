@@ -69,25 +69,19 @@ export const updateGame = async (
     const response = await axiosInstance.patch(`/game/${id}`, gameData);
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return new Error(
-        error.response?.data?.message || 'Failed to update game'
-      );
+      throw new Error(error.response?.data?.message || 'Failed to update game');
     }
   }
 };
 
-export const deleteGame = async (
-  id: string | number,
-) => {
+export const deleteGame = async (id: string | number) => {
   try {
     const response = await axiosInstance.delete(`/game/${id}`);
-    console.log(response)
+    console.log(response);
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return new Error(
-        error.response?.data?.message || 'Failed to delete game'
-      );
+      throw new Error(error.response?.data?.message || 'Failed to delete game');
     }
   }
 };

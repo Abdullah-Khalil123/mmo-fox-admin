@@ -1,5 +1,4 @@
 import { axiosInstance } from '@/lib/axios';
-import { NewsForm } from '@/types/news.schema';
 import axios from 'axios';
 
 export const getNews = async (page = 1, limit = 10, search = '') => {
@@ -32,9 +31,9 @@ export const getNewsById = async (id: string | number) => {
   }
 };
 
-export const createNews = async (newsData: NewsForm) => {
+export const createNews = async (newsData: FormData) => {
   try {
-    const response = await axiosInstance.post('/news/create', newsData);
+    const response = await axiosInstance.post('/news/', newsData);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -45,7 +44,7 @@ export const createNews = async (newsData: NewsForm) => {
   }
 };
 
-export const updateNews = async (id: string | number, newsData: NewsForm) => {
+export const updateNews = async (id: string | number, newsData: FormData) => {
   try {
     const response = await axiosInstance.put(`/news/${id}`, newsData);
     return response.data;

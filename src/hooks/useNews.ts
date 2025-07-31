@@ -6,7 +6,6 @@ import {
   updateNews,
 } from '@/actions/News/actions';
 import queryClient from '@/lib/queryClient';
-import { NewsForm } from '@/types/news.schema';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const useNews = (page = 1, limit = 10, search = '') => {
@@ -26,7 +25,7 @@ export const useNewsById = (id: string | number) => {
 
 export const useCreateNews = () => {
   return useMutation({
-    mutationFn: (newsData: NewsForm) => createNews(newsData),
+    mutationFn: (newsData: FormData) => createNews(newsData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
     },
@@ -35,7 +34,7 @@ export const useCreateNews = () => {
 
 export const useUpdateNews = (id: string | number) => {
   return useMutation({
-    mutationFn: (newsData: NewsForm) => updateNews(id, newsData),
+    mutationFn: (newsData: FormData) => updateNews(id, newsData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news', id] });
       queryClient.invalidateQueries({ queryKey: ['news'] });

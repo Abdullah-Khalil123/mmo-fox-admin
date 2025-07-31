@@ -6,6 +6,7 @@ import { useNewsById } from '@/hooks/useNews';
 import { NewsForm } from '@/types/news.schema';
 import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function AdminArticleView({ newsId }: { newsId: string }) {
   // Mock article data
@@ -20,13 +21,15 @@ export default function AdminArticleView({ newsId }: { newsId: string }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
+          <Link href={'/news'}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full border border-gray-200 shadow-sm hover:bg-gray-50"
+            >
+              <ChevronLeft className="size-5" />
+            </Button>
+          </Link>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
               Article Details
@@ -38,10 +41,12 @@ export default function AdminArticleView({ newsId }: { newsId: string }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Edit className="size-4" />
-            Edit
-          </Button>
+          <Link href={`/news/${newsId}/edit`}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Edit className="size-4" />
+              Edit
+            </Button>
+          </Link>
           <Button
             variant="outline"
             className="flex items-center gap-2 text-red-600 hover:bg-red-50 border-red-200"
@@ -105,9 +110,11 @@ export default function AdminArticleView({ newsId }: { newsId: string }) {
                 <User className="size-4 text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">
-                    {news.author.name}
+                    {news.author?.name || 'Unknown Author'}
                   </p>
-                  <p className="text-xs text-gray-600">{news.author.email}</p>
+                  <p className="text-xs text-gray-600">
+                    {news.author?.email || 'Email Not Available'}
+                  </p>
                 </div>
               </div>
             </div>

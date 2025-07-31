@@ -58,3 +58,16 @@ export const updateUser = async (userData: User) => {
     }
   }
 };
+
+export const deleteUser = async (id: string | number) => {
+  try {
+    const response = await axiosInstance.delete(`/user/${id}`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return new Error(
+        error.response?.data?.message || 'Failed to delete user'
+      );
+    }
+  }
+};

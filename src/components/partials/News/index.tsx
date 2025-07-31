@@ -18,11 +18,11 @@ const NewsPage = () => {
     setPage(1);
   };
   return (
-    <div>
+    <div className="w-full space-y-4">
       <SearchHeader
         title="News Articles"
         discription="Manage your news articles and updates"
-        link="/news/add"
+        link="/news/new"
         onChange={handleSearchChange}
       />
       <NewsTable data={data} isError={isError} isLoading={isLoading} />

@@ -6,12 +6,13 @@ import {
   createGameCategory,
   deleteGameCategory,
   getGameAllDataByID,
+  deleteGame,
 } from '@/actions/Games/actions';
 import queryClient from '@/lib/queryClient';
 import { CategoryFormData, GameFormData } from '@/types/game.schema';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export const useGames = (page: number = 1, limit: number = 1) => {
+export const useGames = (page: number = 1, limit?: number) => {
   return useQuery({
     queryKey: ['games', page, limit],
     queryFn: () => getGames(page, limit),
@@ -73,6 +74,15 @@ export const useDeleteGameCategory = (gameId: string | number) => {
       queryClient.invalidateQueries({
         queryKey: ['game', gameId],
       });
+    },
+  });
+};
+
+export const useDeleteGame = () => {
+  return useMutation({
+    mutationFn: (gameId: string | number) => deleteGame(gameId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['games'] });
     },
   });
 };

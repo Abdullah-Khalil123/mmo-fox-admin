@@ -477,7 +477,7 @@ export default function AddNewGameService({
               )}
             </div>
             {errors.imageUrl && (
-              <ErrorInput>{errors.imageUrl.message}</ErrorInput>
+              <ErrorInput>{errors.imageUrl.message as string}</ErrorInput>
             )}
           </div>
 

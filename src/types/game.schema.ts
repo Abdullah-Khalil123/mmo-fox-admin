@@ -12,11 +12,21 @@ export const categorySchema = z.object({
 export type CategoryFormData = z.infer<typeof categorySchema>;
 
 export const gameSchema = z.object({
+  id: z.string().optional(),
   slug: z.string().min(1, 'Slug is required'),
   imageUrl: z
     .union([
-      z.instanceof(FileList).refine((fileList) => fileList.length > 0),
-      z.undefined(),
+      z
+        .any()
+        .refine(
+          (val) =>
+            typeof File !== 'undefined' &&
+            (val instanceof File || val instanceof FileList),
+          {
+            message: 'Must be a File or FileList',
+          }
+        ),
+      z.url('Must be a valid URL'),
     ])
     .optional(),
   name: z.string().min(1, 'Name is required'),
@@ -49,14 +59,21 @@ export type GameFormData = z.infer<typeof gameSchema>;
 export const serviceSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   slug: z.string().min(3, 'Slug is required'),
-  imageUrl: z.union([
-    // For file uploads
-    z.instanceof(FileList).refine((files) => files.length > 0, {
-      message: 'Image is required',
-    }),
-    // For URL strings
-    z.string().url('Image must be a valid URL').min(1, 'Image URL is required'),
-  ]),
+  imageUrl: z
+    .union([
+      z
+        .any()
+        .refine(
+          (val) =>
+            typeof File !== 'undefined' &&
+            (val instanceof File || val instanceof FileList),
+          {
+            message: 'Must be a File or FileList',
+          }
+        ),
+      z.url('Must be a valid URL'),
+    ])
+    .optional(),
   currency: z.string().min(1, 'Currency is required'),
   vendor: z.string().min(1, 'Vendor is required'),
   status: z.enum(ServiceStatus),
@@ -98,7 +115,6 @@ export type CategoryFieldType = {
 
 export type ServiceFormData = z.infer<typeof serviceSchema>;
 
-
 // Define enums if needed
 export const CurrencyType = z.enum(['GEMS', 'COINS', 'GOLD', 'OTHER']);
 export type CurrencyType = z.infer<typeof CurrencyType>;
@@ -106,38 +122,43 @@ export type CurrencyType = z.infer<typeof CurrencyType>;
 // Price schema
 export const priceSchema = z.object({
   price: z.number().min(0.01, 'Price must be at least 0.01'),
-  currency: z.string().min(1, 'Currency code is required').max(3, 'Currency code must be 3 characters')
+  currency: z
+    .string()
+    .min(1, 'Currency code is required')
+    .max(3, 'Currency code must be 3 characters'),
 });
 
 // Subregion schema
 export const subregionSchema = z.object({
   name: z.string().min(1, 'Subregion name is required'),
-  price: z.array(priceSchema).min(1, 'At least one price is required')
+  price: z.array(priceSchema).min(1, 'At least one price is required'),
 });
 
 // Region schema
 export const regionSchema = z.object({
   name: z.string().min(1, 'Region name is required'),
-  subregion: z.array(subregionSchema).min(1, 'At least one subregion is required')
+  subregion: z
+    .array(subregionSchema)
+    .min(1, 'At least one subregion is required'),
 });
 
 // Country schema
 export const countrySchema = z.object({
   country: z.string().min(1, 'Country name is required'),
-  region: z.array(regionSchema).min(1, 'At least one region is required')
+  region: z.array(regionSchema).min(1, 'At least one region is required'),
 });
 
 // Currency package schema
 export const currencyPackageSchema = z.object({
   amount: z.number().min(1, 'Amount must be at least 1'),
   unit: z.string().min(1, 'Unit is required'),
-  server: z.array(countrySchema).min(1, 'At least one country is required')
+  server: z.array(countrySchema).min(1, 'At least one country is required'),
 });
 
 // Main currency service schema
-export const currencyServiceSchema = z.array(
-  currencyPackageSchema
-).min(1, 'At least one currency package is required');
+export const currencyServiceSchema = z
+  .array(currencyPackageSchema)
+  .min(1, 'At least one currency package is required');
 
 // Type definitions
 export type Price = z.infer<typeof priceSchema>;
