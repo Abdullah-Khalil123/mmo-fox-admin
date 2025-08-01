@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
       'cjpxknfjunyyynwyniuj.supabase.co',
       'example.com',
       'gratisography.com',
-      '*',
-    ], // add this domain
+      'picsum.photos',
+    ],
   },
 };
 

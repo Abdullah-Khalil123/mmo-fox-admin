@@ -11,6 +11,7 @@ import {
   LogOut,
   Newspaper,
   LayoutDashboard,
+  Server,
   ChevronRight,
 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -27,6 +28,7 @@ const links = [
   { href: '/games', label: 'Games', icon: Gamepad2 },
   { href: '/users', label: 'Users', icon: User },
   { href: '/news', label: 'News', icon: Newspaper },
+  { href: '/servers', label: 'Servers', icon: Server },
   { href: '/orders', label: 'Orders', icon: DollarSign },
 ];
 

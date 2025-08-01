@@ -77,7 +77,6 @@ export const updateGame = async (
 export const deleteGame = async (id: string | number) => {
   try {
     const response = await axiosInstance.delete(`/game/${id}`);
-    console.log(response);
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {

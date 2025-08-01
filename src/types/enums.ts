@@ -1,0 +1,13 @@
+export enum ServiceStatus {
+  UNPUBLISHED = 'UNPUBLISHED',
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+}
+
+export enum ServiceType {
+  CURRENCY = 'CURRENCY',
+  LEVELING = 'LEVELING',
+  BOOSTING = 'BOOSTING',
+  COACHING = 'COACHING',
+  OTHER = 'OTHER',
+}

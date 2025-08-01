@@ -29,11 +29,11 @@ import {
 } from '@/components/ui/select';
 
 import {
-  CategoryFieldType,
+  CategoryFormData,
   ServiceFormData,
   serviceSchema,
 } from '@/types/game.schema';
-import { ServiceStatus, ServiceType } from '@/types/game';
+import { ServiceStatus, ServiceType } from '@/types/enums';
 import { useCreateServiceByGameId } from '@/hooks/useServices';
 import CategorySection from '../CategorySection/CategorySection';
 
@@ -47,7 +47,7 @@ export default function AddNewGameService({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const [newCategory, setNewCategory] = useState<CategoryFieldType>({
+  const [newCategory, setNewCategory] = useState<CategoryFormData>({
     name: '',
     slug: '',
   });
@@ -96,7 +96,7 @@ export default function AddNewGameService({
   // Example fix assuming categories should be managed with useState:
 
   // Remove useFieldArray for categories and use useState to manage categories
-  const [categoryFields, setCategoryFields] = useState<CategoryFieldType[]>([]);
+  const [categoryFields, setCategoryFields] = useState<CategoryFormData[]>([]);
   const appendCategory = (category: { name: string; slug: string }) =>
     setCategoryFields((prev) => [...prev, category]);
   const removeCategory = (index: number) =>

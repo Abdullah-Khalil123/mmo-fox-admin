@@ -8,8 +8,8 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import SunEditor from 'suneditor-react';
 import 'suneditor/dist/css/suneditor.min.css';
-import { ServiceStatus, ServiceType } from '@/types/game';
 import { useServiceById } from '@/hooks/useServices';
+import { ServiceStatus, ServiceType } from '@/types/enums';
 
 export default function ViewGameService({
   serviceId,

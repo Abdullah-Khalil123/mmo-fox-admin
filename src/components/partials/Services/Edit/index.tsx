@@ -34,8 +34,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ServiceFormData, serviceSchema } from '@/types/game.schema';
-import { ServiceStatus, ServiceType } from '@/types/game';
 import { useServiceById, useUpdateServiceById } from '@/hooks/useServices';
+import { ServiceStatus, ServiceType } from '@/types/enums';
 
 export default function EditGameService({
   serviceId,

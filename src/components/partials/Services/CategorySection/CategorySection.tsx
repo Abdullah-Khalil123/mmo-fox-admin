@@ -10,18 +10,18 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CategoryFieldType } from '@/types/game.schema';
+import { CategoryFormData } from '@/types/game.schema';
 
 type CategorySectionProps = {
-  categoryFields: CategoryFieldType[];
-  setCategoryFields: React.Dispatch<React.SetStateAction<CategoryFieldType[]>>;
+  categoryFields: CategoryFormData[];
+  setCategoryFields: React.Dispatch<React.SetStateAction<CategoryFormData[]>>;
   categoryModalOpen: boolean;
   setCategoryModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  newCategory: CategoryFieldType;
-  setNewCategory: React.Dispatch<React.SetStateAction<CategoryFieldType>>;
+  newCategory: CategoryFormData;
+  setNewCategory: React.Dispatch<React.SetStateAction<CategoryFormData>>;
   handleAddCategory: () => void;
   removeCategory: (index: number) => void;
-  CategoryField: CategoryFieldType; // Adjust type if needed
+  CategoryField: CategoryFormData; // Adjust type if needed
 };
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -94,7 +94,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       <div className="mt-4">
         {categoryFields.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {categoryFields.map((field: CategoryFieldType, index: number) => (
+            {categoryFields.map((field: CategoryFormData, index: number) => (
               <div
                 key={`${field.name}-${index}`}
                 className="border border-gray-200 rounded-lg p-3 flex justify-between items-center bg-white shadow-sm"

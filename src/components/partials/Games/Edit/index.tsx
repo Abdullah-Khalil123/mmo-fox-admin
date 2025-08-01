@@ -8,7 +8,6 @@ import {
   useGameAllDataByID,
   useUpdateGame,
 } from '@/hooks/useGames';
-import { Game } from '@/types/game';
 import { GameFormData, gameSchema } from '@/types/game.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -37,7 +36,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const gameData: Game = data?.data;
+  const gameData: GameFormData = data?.data;
 
   const {
     register,
@@ -57,7 +56,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
         Array.isArray(gameData?.seo) && gameData?.seo?.length > 0
           ? gameData?.seo.map((s) => ({
               ...s,
-              keywords: s.keywords?.join(', ') || '',
+              keywords: Array.isArray(s.keywords)
+                ? s.keywords.join(', ')
+                : s.keywords || '',
             }))
           : [
               {
@@ -93,7 +94,9 @@ const EditGame = ({ gameId }: { gameId: number }) => {
           Array.isArray(gameData.seo) && gameData.seo.length > 0
             ? gameData.seo.map((s) => ({
                 ...s,
-                keywords: s.keywords?.join(', ') || '',
+                keywords: Array.isArray(s.keywords)
+                  ? s.keywords.join(', ')
+                  : s.keywords || '',
                 introduction: s.introduction || '',
               }))
             : [
@@ -606,7 +609,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                 </Label>
                 <p className="text-sm font-medium">
                   {gameData
-                    ? new Date(gameData.createdAt).toLocaleString()
+                    ? new Date(gameData.createdAt as string).toLocaleString()
                     : 'N/A'}
                 </p>
               </div>
@@ -616,7 +619,7 @@ const EditGame = ({ gameId }: { gameId: number }) => {
                 </Label>
                 <p className="text-sm font-medium">
                   {gameData
-                    ? new Date(gameData.updatedAt).toLocaleString()
+                    ? new Date(gameData.updatedAt as string).toLocaleString()
                     : 'N/A'}
                 </p>
               </div>

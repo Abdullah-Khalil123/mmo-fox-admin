@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useGameAllDataByID } from '@/hooks/useGames';
-import { Game } from '@/types/game';
 import {
   ChevronLeft,
   Globe,
@@ -19,12 +18,13 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { GameFormData } from '@/types/game.schema';
 
 const GameView = ({ gameId }: { gameId: string }) => {
   const router = useRouter();
   const { data, isLoading, isError } = useGameAllDataByID(gameId);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const gameData: Game = data?.data;
+  const gameData: GameFormData = data?.data;
 
   useEffect(() => {
     if (gameData?.imageUrl) {
@@ -478,7 +478,8 @@ const GameView = ({ gameId }: { gameId: string }) => {
                         Keywords
                       </Label>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {seo.keywords && seo.keywords.length > 0 ? (
+                        {Array.isArray(seo.keywords) &&
+                        seo.keywords.length > 0 ? (
                           seo.keywords.map((keyword: string, idx: number) => (
                             <Badge
                               key={idx}
@@ -518,8 +519,9 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   Created At
                 </Label>
                 <p className="text-sm font-medium">
-                  {new Date(gameData.createdAt).toLocaleDateString()} at{' '}
-                  {new Date(gameData.createdAt).toLocaleTimeString()}
+                  {new Date(gameData.createdAt as string).toLocaleDateString()}{' '}
+                  at{' '}
+                  {new Date(gameData.createdAt as string).toLocaleTimeString()}
                 </p>
               </div>
             </div>
@@ -532,8 +534,9 @@ const GameView = ({ gameId }: { gameId: string }) => {
                   Last Updated
                 </Label>
                 <p className="text-sm font-medium">
-                  {new Date(gameData.updatedAt).toLocaleDateString()} at{' '}
-                  {new Date(gameData.updatedAt).toLocaleTimeString()}
+                  {new Date(gameData.updatedAt as string).toLocaleDateString()}{' '}
+                  at{' '}
+                  {new Date(gameData.updatedAt as string).toLocaleTimeString()}
                 </p>
               </div>
             </div>

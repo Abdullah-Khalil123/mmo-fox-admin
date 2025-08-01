@@ -8,14 +8,14 @@ import {
   TableCell,
   Table,
 } from '@/components/ui/table';
-import { Game } from '@/types/game';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import ConfirmDeleteDialog from '@/components/layouts/Dialog';
 import { useDeleteGame } from '@/hooks/useGames';
+import { GameFormData } from '@/types/game.schema';
 
-const GameTable = ({ games }: { games: Game[] }) => {
+const GameTable = ({ games }: { games: GameFormData[] }) => {
   const router = useRouter();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState<string | number | null>(null);
@@ -50,7 +50,7 @@ const GameTable = ({ games }: { games: Game[] }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {games.map((game: Game) => (
+          {games.map((game: GameFormData) => (
             <TableRow key={game.id}>
               <TableCell className="font-medium">{game.id}</TableCell>
               <TableCell>{game.name}</TableCell>

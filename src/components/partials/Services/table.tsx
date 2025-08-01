@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -10,7 +11,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { useDeleteServiceById } from '@/hooks/useServices';
-import { Service } from '@/types/game';
+import { ServiceFormData } from '@/types/game.schema';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -18,7 +19,7 @@ const ServicesTable = ({
   services,
   gameId,
 }: {
-  services?: Service[];
+  services?: ServiceFormData[];
   gameId: string | number;
 }) => {
   const router = useRouter();
@@ -44,12 +45,12 @@ const ServicesTable = ({
             <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Price</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead className="text-end">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {services.map((service: Service) => (
+          {services.map((service: ServiceFormData) => (
             <TableRow key={service.id}>
               <TableCell>{service.id}</TableCell>
               <TableCell>{service.name}</TableCell>
@@ -70,7 +71,7 @@ const ServicesTable = ({
               </TableCell>
 
               <TableCell>
-                {service.currency} {service.basePrice}
+                <Badge>{service.type}</Badge>
               </TableCell>
               <TableCell>
                 <div className="flex justify-end gap-2">
@@ -102,7 +103,7 @@ const ServicesTable = ({
                     disabled={isPending}
                     variant={'destructive'}
                     onClick={() => {
-                      handleDelete(service.id);
+                      handleDelete(service.id as string | number);
                     }}
                   >
                     Delete

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ServiceStatus, ServiceType } from './game';
+import { ServiceStatus, ServiceType } from './enums';
 
 export const categorySchema = z.object({
   id: z.number().int('ID must be a number').optional(),
@@ -8,12 +8,13 @@ export const categorySchema = z.object({
   gameId: z.number().int('Game ID must be a number').optional(),
   parentId: z.number().int().optional(),
 });
-
 export type CategoryFormData = z.infer<typeof categorySchema>;
 
 export const gameSchema = z.object({
   id: z.string().optional(),
   slug: z.string().min(1, 'Slug is required'),
+  categories: z.array(categorySchema).optional(),
+  services: z.array(z.any()).optional(),
   imageUrl: z
     .union([
       z
@@ -32,13 +33,14 @@ export const gameSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   seo: z.array(
     z.object({
+      id: z.string().optional(),
       language: z.string().min(2, 'Language is required'),
       metaTitle: z.string().min(1, 'Title is required'),
       metaDescription: z.string().min(1, 'Description is required'),
       keywords: z
         .union([
-          z.string(), // comma-separated string
-          z.array(z.string().min(1, 'Keyword is required')),
+          z.string(),
+          z.array(z.string().min(1, 'Keyword is required')).optional(),
         ])
         .refine(
           (val) => {
@@ -50,13 +52,15 @@ export const gameSchema = z.object({
       introduction: z.string().min(1, 'Introduction is required'),
     })
   ),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
-
 export type GameFormData = z.infer<typeof gameSchema>;
 
 // Define ServiceType enum if not already defined
 
 export const serviceSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(3, 'Name must be at least 3 characters'),
   slug: z.string().min(3, 'Slug is required'),
   imageUrl: z
@@ -78,14 +82,7 @@ export const serviceSchema = z.object({
   vendor: z.string().min(1, 'Vendor is required'),
   status: z.enum(ServiceStatus),
   type: z.enum(ServiceType),
-  categories: z
-    .array(
-      z.object({
-        name: z.string().min(1, 'Category name is required'),
-        slug: z.string().min(1, 'Category slug is required'),
-      })
-    )
-    .optional(),
+  categories: z.array(categorySchema).optional(),
   seo: z.array(
     z.object({
       language: z.string().min(2, 'Language is required'),
@@ -107,11 +104,6 @@ export const serviceSchema = z.object({
     })
   ),
 });
-
-export type CategoryFieldType = {
-  name: string;
-  slug?: string;
-};
 
 export type ServiceFormData = z.infer<typeof serviceSchema>;
 
