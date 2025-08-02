@@ -54,7 +54,7 @@ export default function CurrencyConfigUI({ serviceId }: { serviceId: string }) {
 
   useEffect(() => {
     if (isLoading || hasInitialized.current) return;
-    const currencyConfig: CurrencyConfigFormData = data?.currencyConfig;
+    const currencyConfig: CurrencyConfigFormData = data?.data;
     if (currencyConfig) {
       form.reset({
         serviceId,
@@ -67,7 +67,7 @@ export default function CurrencyConfigUI({ serviceId }: { serviceId: string }) {
       });
       hasInitialized.current = true;
     }
-  }, [data, form, serverField, isLoading, serviceId]);
+  }, [data, form, serverField, isLoading]);
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
