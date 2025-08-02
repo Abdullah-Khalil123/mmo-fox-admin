@@ -9,10 +9,12 @@ import {
   useCreateCurrencyConfig,
   useGetCurrencyConfig,
 } from '@/hooks/useCurrencyConfig';
+import { useRouter } from 'next/navigation';
 
 // Corrected server data structure
 
 export default function CurrencyConfigUI({ serviceId }: { serviceId: string }) {
+  const router = useRouter();
   const { mutate, isPending } = useCreateCurrencyConfig(serviceId);
   const { data, isLoading } = useGetCurrencyConfig(serviceId);
 
@@ -73,9 +75,13 @@ export default function CurrencyConfigUI({ serviceId }: { serviceId: string }) {
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 sm:mb-8">
-        <button className="p-2 rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+        <Button
+          onClick={() => router.back()}
+          variant={'secondary'}
+          className="size-10 rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+        >
           ←
-        </button>
+        </Button>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
             Currency Service Configuration
